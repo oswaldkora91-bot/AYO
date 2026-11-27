@@ -39,6 +39,28 @@ Le dossier se publie tel quel sur Vercel, Netlify ou tout hébergeur de fichiers
 
 **Avec GitHub Pages (gratuit pour un dépôt public) :** *Settings* › *Pages* › *Build and deployment* : Source « Deploy from a branch », branche `main`, dossier `/ (root)`, puis *Save*. Le site est en ligne après une ou deux minutes à l'adresse `https://oswaldkora91-bot.github.io/AYO/`. Mettez cette adresse dans Supabase › *Authentication* › *URL Configuration* (« Site URL » et « Redirect URLs »).
 
+## Application Android
+
+Le site s'installe comme une application sur un téléphone Android, sans passer par le Play Store :
+
+- ouvrez le site dans **Chrome** sur le téléphone ;
+- appuyez sur **« Installer l'application »** (ou « Installer la boutique ») en bas de l'écran, ou dans le menu ☰ ;
+- sinon : menu ⋮ de Chrome › **« Ajouter à l'écran d'accueil »**.
+
+Ce qui rend cela possible :
+
+| Fichier | Rôle |
+|---|---|
+| `manifest-entreprise.webmanifest` | Application « AYO Pro » pour les commerçants (ouvre `index.html`) |
+| `manifest-boutique.webmanifest` | Application « Boutique » pour les clients (rouvre la dernière boutique visitée) |
+| `icons/` | Icônes de l'application (écran d'accueil, Android, iPhone) |
+| `sw.js` | Mode hors connexion : garde une copie des fichiers du site ; les données Supabase restent toujours en direct |
+
+Dans l'application installée, la touche **retour** d'Android ferme d'abord la fenêtre ouverte (panier, connexion, facture, menu) au lieu de quitter.
+L'installation demande une adresse en **https** (GitHub Pages et Vercel le sont).
+
+Pour publier ensuite sur le **Play Store**, collez l'adresse du site sur **pwabuilder.com** : il fabrique le paquet Android à partir de ces fichiers.
+
 ## Les 5 formats de boutique
 
 | N° | Nom | Style |
@@ -70,9 +92,10 @@ Le code de `js/commun/` sert aux deux pages. Quand une partie est différente en
 - `11-back-office.css` — Back-office
 - `12-ecran-plein-connexion-inscription.css` — Écran plein connexion / inscription
 - `13-4-styles-de-site-un-par.css` — 4 STYLES DE SITE (un par format)
-- `14-modele-delice-pour-la-boutique.css` — MODÈLE « DÉLICE » pour la boutique
-- `15-back-office-style-delice-ca.css` — Back-office, style delice.ca
-- `16-back-office-menu-lateral.css` — BACK-OFFICE : MENU LATÉRAL
+- `14-telephone-android-application-installee.css` — Téléphone Android & application installée
+- `15-modele-delice-pour-la-boutique.css` — MODÈLE « DÉLICE » pour la boutique
+- `16-back-office-style-delice-ca.css` — Back-office, style delice.ca
+- `17-back-office-menu-lateral.css` — BACK-OFFICE : MENU LATÉRAL
 
 **`js/`**
 
@@ -119,6 +142,7 @@ Le code de `js/commun/` sert aux deux pages. Quand une partie est différente en
 - `39-entreprise-sites-connectes.js` — ENTREPRISE & SITES CONNECTÉS
 - `40-modele-delice-remplissage-et-mouvements-de.js` — MODÈLE « DÉLICE » : remplissage et mouvements de la boutique
 - `41-cloud-base-de-donnees-supabase.js` — CLOUD : base de données Supabase
+- `43-application-android-pwa.js` — APPLICATION ANDROID (PWA)
 
 **`js/espace-entreprise/`**
 

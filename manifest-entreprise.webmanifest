@@ -1,0 +1,43 @@
+{
+  "id": "./?app=ayo-entreprise",
+  "name": "AYO — Espace entreprise",
+  "short_name": "AYO Pro",
+  "description": "Gérez votre boutique, vos commandes, votre stock et vos factures depuis votre téléphone.",
+  "start_url": "./index.html?source=app",
+  "lang": "fr",
+  "dir": "ltr",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#FBF7F0",
+  "theme_color": "#231712",
+  "categories": [
+    "business",
+    "food",
+    "shopping"
+  ],
+  "icons": [
+    {
+      "src": "icons/ayo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/ayo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/ayo-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "./?app=ayo-boutique",
+  "name": "Boutique — commande en ligne",
+  "short_name": "Boutique",
+  "description": "Commandez en ligne et payez par Mobile Money.",
+  "start_url": "./boutique.html?source=app",
+  "lang": "fr",
+  "dir": "ltr",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#FBF7F0",
+  "theme_color": "#231712",
+  "categories": [
+    "business",
+    "food",
+    "shopping"
+  ],
+  "icons": [
+    {
+      "src": "icons/boutique-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/boutique-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/boutique-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
