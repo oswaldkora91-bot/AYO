@@ -1,0 +1,58 @@
+/* AYO — Démo en direct : AYO construit un site */
+/* ==================== Démo en direct : AYO construit un site ==================== */
+#ayo-live-demo { position: relative; }
+.demo-step { position: relative; display: flex; gap: .9rem; padding: .9rem 1rem; border-radius: 1.1rem; transition: background-color .4s, transform .4s cubic-bezier(.2,.9,.2,1); }
+.demo-step .num { width: 30px; height: 30px; flex-shrink: 0; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; border: 2px solid rgba(35,23,18,.18); color: rgba(35,23,18,.45); transition: all .4s; }
+.demo-step strong { color: rgba(35,23,18,.5); transition: color .4s; }
+.demo-step p { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .5s, opacity .4s; }
+.demo-step .bar { position: absolute; left: 1rem; right: 1rem; bottom: 0; height: 2px; background: #D4A373; transform: scaleX(0); transform-origin: 0 50%; }
+.demo-step.is-on { background: #fff; transform: translateX(6px); box-shadow: 0 18px 36px -24px rgba(35,23,18,.6); }
+.demo-step.is-on .num { background: #231712; border-color: #231712; color: #F6D99A; }
+.demo-step.is-on strong { color: #231712; }
+.demo-step.is-on p { max-height: 60px; opacity: 1; }
+.demo-step.is-on .bar { animation: stepBar var(--dur, 1.2s) linear forwards; }
+.demo-step.is-done .num { background: #2E6F40; border-color: #2E6F40; color: #fff; }
+.demo-step.is-done strong { color: rgba(35,23,18,.78); }
+@keyframes stepBar { to { transform: scaleX(1); } }
+
+.demo-browser { position: relative; border-radius: 1.4rem; background: #fff; box-shadow: 0 40px 80px -40px rgba(35,23,18,.7), 0 0 0 1px rgba(35,23,18,.08); overflow: hidden; }
+.demo-chrome { display: flex; align-items: center; gap: .5rem; padding: .7rem .9rem; background: #F1E7D6; border-bottom: 1px solid rgba(35,23,18,.08); }
+.demo-chrome .dots span { display: inline-block; width: 9px; height: 9px; border-radius: 9999px; margin-right: 4px; background: rgba(35,23,18,.18); }
+.demo-url { flex: 1; font-size: 12px; font-weight: 600; color: #4A3428; background: #fff; border-radius: 9999px; padding: .35rem .8rem; white-space: nowrap; overflow: hidden; }
+.demo-url .caret { display: inline-block; width: 1.5px; height: 1em; background: #A0522D; vertical-align: -2px; margin-left: 1px; animation: caret .8s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.demo-page { position: relative; height: 330px; padding: 1rem; background: var(--brand-bg, #FBF7F0); transition: background-color .6s; overflow: hidden; }
+@media (max-width: 640px) { .demo-page { height: 300px; } }
+.demo-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; opacity: 0; transform: translateY(-24px); transition: opacity .45s, transform .6s cubic-bezier(.2,1.2,.3,1); }
+.demo-logo { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-family: "Playfair Display", serif; font-weight: 700; background: var(--brand, #A0522D); transition: background-color .6s; }
+.demo-hero { margin-top: .8rem; opacity: 0; transform: translateY(14px); transition: opacity .5s .1s, transform .6s .1s cubic-bezier(.2,.9,.2,1); }
+.demo-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin-top: .9rem; }
+.demo-card { position: relative; background: #fff; border-radius: 14px; padding: .55rem; box-shadow: 0 10px 20px -14px rgba(35,23,18,.5); opacity: 0; transform: translateY(-60px) rotate(var(--rot, -6deg)); transition: opacity .3s, transform .75s cubic-bezier(.2,1.5,.35,1); }
+.demo-card .ph { aspect-ratio: 4/3; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--tint, #F4E1E6); color: var(--brand, #A0522D); }
+.demo-card .ph svg { width: 42%; height: 42%; transition: transform .6s cubic-bezier(.2,1.4,.3,1); }
+.demo-card .add { position: absolute; right: .55rem; bottom: .55rem; width: 22px; height: 22px; border-radius: 9999px; background: #231712; color: #F6D99A; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: transform .2s; }
+.demo-card .add.hit { transform: scale(.75); background: var(--brand, #A0522D); }
+.demo-cart { position: relative; display: inline-flex; align-items: center; gap: .35rem; background: #231712; color: #fff; font-size: 11px; font-weight: 800; padding: .35rem .7rem; border-radius: 9999px; }
+.demo-cart b { background: #D4A373; color: #231712; border-radius: 9999px; padding: 0 .4rem; }
+.demo-cart b.pop { animation: ayoBump .45s; }
+.demo-toasts { position: absolute; right: .8rem; bottom: .8rem; display: flex; flex-direction: column; align-items: flex-end; gap: .45rem; }
+.demo-toast { display: flex; align-items: center; gap: .5rem; font-size: 11px; font-weight: 700; padding: .55rem .8rem; border-radius: 12px; color: #fff; box-shadow: 0 16px 30px -14px rgba(0,0,0,.6); opacity: 0; transform: translateX(40px) scale(.9); transition: opacity .35s, transform .6s cubic-bezier(.2,1.4,.3,1); }
+.demo-toast.in { opacity: 1; transform: none; }
+.demo-toast svg { width: 14px; height: 14px; }
+.demo-cursor { position: absolute; left: 70%; top: 85%; width: 22px; height: 22px; z-index: 5; pointer-events: none; transition: left .9s cubic-bezier(.5,0,.2,1), top .9s cubic-bezier(.5,0,.2,1), transform .15s; filter: drop-shadow(0 4px 6px rgba(0,0,0,.35)); }
+.demo-cursor.press { transform: scale(.8); }
+.demo-page.built .demo-head, .demo-page.built .demo-hero { opacity: 1; transform: none; }
+.demo-page .demo-card.in { opacity: 1; transform: none; }
+.demo-page.wipe > * { transition: opacity .4s, transform .5s cubic-bezier(.6,0,.4,1) !important; opacity: 0 !important; transform: translateY(20px) scale(.97) !important; }
+.demo-kind { display: inline-block; min-width: 1ch; }
+.demo-kind.flip { animation: kindFlip .6s cubic-bezier(.2,.9,.2,1); }
+@keyframes kindFlip { 0% { transform: translateY(60%); opacity: 0; filter: blur(4px); } 100% { transform: none; opacity: 1; filter: none; } }
+.demo-orbit { position: absolute; border-radius: 9999px; border: 1px dashed rgba(160,82,45,.35); pointer-events: none; animation: orbitSpin 40s linear infinite; }
+@keyframes orbitSpin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+    #ayo-intro, #ayo-progress { display: none; }
+    .w-mask > .w-in { transform: none; transition: none; }
+    .ayo-marquee-track, .demo-orbit { animation: none; }
+    .demo-head, .demo-hero, .demo-card { opacity: 1; transform: none; }
+}

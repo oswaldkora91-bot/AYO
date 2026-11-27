@@ -1,0 +1,28 @@
+/* AYO — ANIMATIONS PARTOUT */
+/* ==================== ANIMATIONS PARTOUT ==================== */
+@keyframes ayoSlideDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: none; } }
+@keyframes ayoSlideLeft { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes ayoKen { from { transform: scale(1); } to { transform: scale(1.08); } }
+@keyframes ayoPop { 0% { opacity: 0; transform: scale(.6); } 70% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
+.ayo-head { animation: ayoSlideDown .6s cubic-bezier(.2,.8,.2,1) both; }
+/* Listes et grilles : les éléments arrivent en cascade à chaque affichage */
+.stagger > * { animation: ayoFadeUp .55s cubic-bezier(.2,.8,.2,1) both; }
+.stagger > *:nth-child(1) { animation-delay: .02s; } .stagger > *:nth-child(2) { animation-delay: .07s; }
+.stagger > *:nth-child(3) { animation-delay: .12s; } .stagger > *:nth-child(4) { animation-delay: .17s; }
+.stagger > *:nth-child(5) { animation-delay: .22s; } .stagger > *:nth-child(6) { animation-delay: .27s; }
+.stagger > *:nth-child(7) { animation-delay: .32s; } .stagger > *:nth-child(8) { animation-delay: .37s; }
+.stagger > *:nth-child(n+9) { animation-delay: .42s; }
+.bo-panel-enter { animation: ayoFadeUp .5s cubic-bezier(.2,.8,.2,1) both; }
+/* Fenêtres */
+#cart-drawer.flex > div { animation: ayoSlideLeft .45s cubic-bezier(.2,.8,.2,1) both; }
+#cart-drawer.flex, #auth-modal.flex, #invoice-modal.flex, #create-tenant-modal.flex { animation: ayoFadeIn .3s ease both; }
+#invoice-modal.flex > div, #create-tenant-modal.flex > div, #auth-modal.flex > div { animation: ayoZoomIn .4s cubic-bezier(.2,.8,.2,1) both; }
+/* Images vivantes */
+#podium-img { animation: ayoKen 7s ease-in-out infinite alternate; }
+/* Boutons, onglets, pastilles */
+.cat-btn, .fmt-pill, .bo-tab, .curr-btn { transition: all .25s ease; }
+.cat-btn:hover, .bo-tab:hover { transform: translateY(-2px); }
+#topbar-cart-count, #nav-cart-count, #bo-notif-count, #topbar-orders-badge { display: inline-block; }
+.pop-in { animation: ayoPop .45s cubic-bezier(.2,.8,.2,1) both; }
+.ayo-card-hover { transition: transform .25s ease, box-shadow .25s ease; }
+.ayo-card-hover:hover { transform: translateY(-4px); box-shadow: 0 18px 30px -14px rgba(35,23,18,.28); }

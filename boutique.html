@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AYO crée le site web de votre commerce et vous donne les services pour le faire tourner : paiement Mobile Money, commandes, stock, facture normalisée, réseaux sociaux.">
+    <meta name="theme-color" content="#231712">
+    <meta property="og:title" content="AYO — votre site web et vos services, prêts en quelques minutes">
+    <meta property="og:description" content="Site, paiement Mobile Money, commandes, stock et facturation pour les commerces du Bénin et d'Afrique de l'Ouest.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23231712'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Georgia,serif' font-size='26' font-weight='700' fill='%23F6D99A'%3EAYO%3C/text%3E%3C/svg%3E">
+    <title>Boutique en ligne</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- QR code (factures normalisées) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Inter & Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Jost:wght@300;400;500;600&family=Gilda+Display&family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&family=DM+Sans:wght@400;500;700&family=Nunito+Sans:wght@400;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500&display=swap" rel="stylesheet">
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/00-base.css">
+    <link rel="stylesheet" href="css/01-animations-du-site.css">
+    <link rel="stylesheet" href="css/02-animations-partout.css">
+    <link rel="stylesheet" href="css/03-formats-modernes-animes.css">
+    <link rel="stylesheet" href="css/04-format-2-la-carte-qui-tourne.css">
+    <link rel="stylesheet" href="css/05-format-4-coffret-a-composer.css">
+    <link rel="stylesheet" href="css/06-motion-v3-site-vivant.css">
+    <link rel="stylesheet" href="css/07-demo-en-direct-ayo-construit-un.css">
+    <link rel="stylesheet" href="css/08-format-1-vitrine-immersive.css">
+    <link rel="stylesheet" href="css/09-services-generes-ils-tombent-du-generateur.css">
+    <link rel="stylesheet" href="css/10-modern-v4-finitions-sur-tout-le.css">
+    <link rel="stylesheet" href="css/11-back-office.css">
+    <link rel="stylesheet" href="css/12-ecran-plein-connexion-inscription.css">
+    <link rel="stylesheet" href="css/13-4-styles-de-site-un-par.css">
+    <link rel="stylesheet" href="css/14-modele-delice-pour-la-boutique.css">
+    <link rel="stylesheet" href="css/15-back-office-style-delice-ca.css">
+    <link rel="stylesheet" href="css/16-back-office-menu-lateral.css">
+</head>
+<body class="bg-vanilla text-darkChoc antialiased selection:bg-brass selection:text-darkChoc">
+
+    <!-- ==================== 1. TOP BAR UNIFIÉE AYO × DÉLICES SUCRÉS ==================== -->
+    <header class="ayo-head bg-darkChoc text-vanilla text-xs border-b border-brass/35 sticky top-0 z-50 shadow-xl">
+        <div class="hdr-row max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span id="shop-top-name" class="font-serif text-sm font-bold text-brass">Boutique</span>
+                <span class="hidden sm:inline text-vanilla/60">• Boutique en ligne</span>
+            </div>
+            <div class="hdr-right flex items-center gap-1.5 sm:gap-2">
+                <button type="button" onclick="toggleCartDrawer(true)" class="hdr-cart px-3 py-1.5 rounded-full font-bold bg-white/10 hover:bg-white/20 text-vanilla border border-brass/35 transition-all flex items-center gap-1.5">
+                    <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-brass"></i>
+                    <span id="topbar-cart-count" class="bg-brass text-darkChoc font-extrabold px-1.5 rounded-full text-[10px]">0</span>
+                </button>
+                <button type="button" id="hdr-burger" class="hdr-burger" onclick="toggleHdrMenu()" aria-expanded="false" aria-controls="hdr-menu" aria-label="Ouvrir le menu"><span></span><span></span><span></span></button>
+            <div id="hdr-menu" class="hdr-menu flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <nav class="flex items-center bg-cocoaSoft p-1 rounded-full border border-white/10 gap-0.5">
+                    <button type="button" onclick="switchView('client')" id="tab-view-client" class="px-3 py-1 rounded-full font-bold transition-all bg-brass text-darkChoc shadow-sm flex items-center gap-1">
+                        <i data-lucide="store" class="w-3.5 h-3.5"></i><span>Boutique</span>
+                    </button>
+                    <button type="button" onclick="switchView('customer')" id="tab-view-customer" class="px-3 py-1 rounded-full font-semibold transition-all text-vanilla/85 hover:text-white flex items-center gap-1">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i><span>Mon compte & avis</span>
+                    </button>
+                </nav>
+                <div class="flex items-center bg-cocoaSoft p-0.5 rounded-full border border-brass/35">
+                    <button type="button" onclick="setCurrency('FCFA')" data-curr="FCFA" class="curr-btn px-2 py-1 rounded-full font-extrabold text-[10px] bg-brass text-darkChoc">FCFA</button>
+                    <button type="button" onclick="setCurrency('EUR')" data-curr="EUR" class="curr-btn px-2 py-1 rounded-full font-semibold text-[10px] text-vanilla/80 hover:text-white">EUR €</button>
+                    <button type="button" onclick="setCurrency('USD')" data-curr="USD" class="curr-btn px-2 py-1 rounded-full font-semibold text-[10px] text-vanilla/80 hover:text-white">USD $</button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== VIEWPORT WRAPPER (DESKTOP 100% / MOBILE 390PX) ==================== -->
+    <div id="viewport-wrapper" class="transition-all duration-300">
+
+        <!-- ========================================================================= -->
+        <!-- VUE 1 : VITRINE CLIENT — ROUE CIRCULAIRE EN ARC, CINTRES BOIS & PODIUM    -->
+        <!-- ========================================================================= -->
+        <main id="view-client" class="min-h-screen">
+            <!-- Atelier Sub-Header -->
+            <nav class="bg-vanilla/95 backdrop-blur-md border-b border-beech/25 sticky top-[46px] z-40">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div id="brand-initials-box" class="w-10 h-10 rounded-2xl bg-darkChoc text-brass flex items-center justify-center font-serif font-extrabold text-lg shadow">
+                            DS
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span id="brand-display-title" class="font-serif text-lg sm:text-xl font-bold text-darkChoc">Délices Sucrés</span>
+                                <span class="hidden sm:inline-flex items-center gap-1 bg-sageLight text-sage text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                                    <i data-lucide="check-circle-2" class="w-3 h-3"></i>
+                                    <span>Commande en ligne</span>
+                                </span>
+                            </div>
+                            <p id="brand-display-sub" class="text-[11px] text-cocoaSoft">Haute Pâtisserie Artisanale & Événements • Cotonou</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                        <div class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-beech/35 text-xs">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-caramel"></i>
+                            <select id="branch-selector" onchange="changeBranch(this.value)" class="bg-transparent font-bold text-darkChoc focus:outline-none cursor-pointer">
+                                <option value="haie-vive">Atelier Haie Vive (Cotonou)</option>
+                                <option value="peches">Comptoir Route des Pêches (Fidjrossè)</option>
+                                <option value="parakou">Stand Foire & Événements (Parakou)</option>
+                            </select>
+                        </div>
+
+                        <a href="#arc-carousel-section" class="hidden md:inline-block text-xs font-bold text-darkChoc hover:text-caramel px-2">Menu & Fiche</a>
+                        <a href="#agenda-section" class="hidden md:inline-block text-xs font-bold text-darkChoc hover:text-caramel px-2">Agenda</a>
+                        <a href="#reviews-section" class="hidden md:inline-block text-xs font-bold text-darkChoc hover:text-caramel px-2">Avis Clients</a>
+                        <a href="#contact-section" class="hidden md:inline-block text-xs font-bold text-darkChoc hover:text-caramel px-2">Contact</a>
+
+                        <button type="button" onclick="toggleCartDrawer(true)" class="bg-darkChoc hover:bg-caramel text-vanilla font-bold px-4 py-2 rounded-full text-xs flex items-center gap-2 shadow transition-all">
+                            <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-brass"></i>
+                            <span>Panier</span>
+                            <span id="nav-cart-count" class="bg-brass text-darkChoc font-extrabold px-2 py-0.5 rounded-full text-[11px]">0</span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <!-- Bandeau défilant de la boutique -->
+            <div class="bg-darkChoc text-brass ayo-marquee" style="--mq-dur:38s" aria-label="Infos boutique">
+                <div class="ayo-marquee-track text-[11px] font-extrabold tracking-wide py-2" id="shop-marquee-track"></div>
+            </div>
+
+
+            <!-- ===================================================================== -->
+            <!-- SECTION 2 : VITRINE CLASSIQUE & CARROUSEL HORIZONTAL DES CRÉATIONS    -->
+            <!-- ===================== MODÈLE « DÉLICE » : accueil de la boutique ===================== -->
+            <section id="dl-hero" class="dl-hero">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-8 lg:gap-6 items-center">
+                    <div class="lg:col-span-6 dl-hero-text">
+                        <span id="dl-overline" class="dl-overline">Bienvenue</span>
+                        <h1 id="hero-main-title" class="dl-title">Délices Sucrés</h1>
+                        <svg class="dl-paths" viewBox="0 0 420 70" preserveAspectRatio="none" aria-hidden="true">
+                            <path d="M2 40 C 60 18, 130 10, 210 16 S 350 40, 418 26"/>
+                            <path d="M2 52 C 70 30, 140 22, 220 28 S 352 54, 418 40"/>
+                            <path d="M2 64 C 80 44, 150 36, 230 42 S 356 66, 418 54"/>
+                        </svg>
+                        <p id="hero-main-subtitle" class="dl-sub">Découvrez nos créations et commandez en ligne.</p>
+                        <div id="shop-facts" class="shop-facts"></div>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <a href="#arc-carousel-section" class="dl-btn" onclick="event.preventDefault(); dlScrollTo('arc-carousel-section')">Voir la carte</a>
+                            <a href="#agenda-section" class="dl-btn -ghost" onclick="event.preventDefault(); dlScrollTo('agenda-section')">Réserver une date</a>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-6 dl-hero-media" aria-hidden="true">
+                        <div class="dl-arch"><img id="dl-hero-img" alt=""></div>
+                        <div class="dl-bulge"><img id="dl-hero-img2" alt=""></div>
+                        <span class="dl-stamp-mini"><b id="dl-hero-count">0</b><span>créations</span></span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dl-callout" class="dl-callout">
+                <svg class="dl-callout-shape s1" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 2 C80 2 98 20 98 50 S80 98 50 98 2 80 2 50 20 2 50 2Z"/></svg>
+                <svg class="dl-callout-shape s2" viewBox="0 0 100 100" aria-hidden="true"><path d="M10 50 Q50 0 90 50 Q50 100 10 50Z"/></svg>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-10 items-center">
+                    <div id="dl-callout-gallery" class="lg:col-span-7 dl-callout-gallery"></div>
+                    <div class="lg:col-span-5 space-y-5">
+                        <span class="dl-overline -light">La carte</span>
+                        <h2 class="dl-h2 text-white">Une création pour chaque occasion</h2>
+                        <p id="dl-callout-text" class="text-white/85 text-base leading-relaxed max-w-md">Gâteaux, tartes, viennoiseries et coffrets, préparés à la commande. Choisissez, payez en ligne, on s'occupe du reste.</p>
+                        <a href="#arc-carousel-section" class="dl-btn -light" onclick="event.preventDefault(); dlScrollTo('arc-carousel-section')">Découvrir la carte</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================================================================== -->
+            <section id="arc-carousel-section" class="relative overflow-x-clip bg-gradient-to-b from-vanillaDark/75 via-vanilla to-vanilla pt-8 pb-12 border-b border-beech/25">
+                <span class="ayo-blob" style="width:320px;height:320px;background:#D4A373;top:-90px;right:-60px;opacity:.35;"></span>
+                <span class="ayo-blob" style="width:260px;height:260px;background:#C68B59;top:420px;left:-90px;opacity:.22;animation-delay:-6s;"></span>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <!-- Editorial Hero Banner -->
+                    <div class="shop-hero flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+                        <div class="hidden"><span id="hero-format-badge"></span><span id="hero-format-name"></span></div>
+
+                </div>
+
+                <!-- Category Filter + Horizontal Wheel Controls -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                    <div class="cat-row flex flex-wrap gap-2">
+                        <button type="button" onclick="filterCategory('all')" data-cat="all" class="cat-btn px-4 py-2 rounded-full text-xs font-bold bg-darkChoc text-brass shadow-sm">Toutes les Créations (6)</button>
+                        <button type="button" onclick="filterCategory('entremets')" data-cat="entremets" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold bg-white text-darkChoc border border-beech/35">Entremets</button>
+                        <button type="button" onclick="filterCategory('tartes')" data-cat="tartes" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold bg-white text-darkChoc border border-beech/35">Tartes Fines</button>
+                        <button type="button" onclick="filterCategory('viennoiseries')" data-cat="viennoiseries" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold bg-white text-darkChoc border border-beech/35">Viennoiseries</button>
+                        <button type="button" onclick="filterCategory('coffrets')" data-cat="coffrets" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold bg-white text-darkChoc border border-beech/35">Coffrets</button>
+                    </div>
+
+                    <div id="wheel-nav-arrows" class="flex items-center gap-2">
+                        <span class="hidden sm:inline text-[11px] font-semibold text-cocoaSoft mr-1">Faites glisser le menu :</span>
+                        <button type="button" onclick="spinWheel(-1)" aria-label="Défiler à gauche" class="w-10 h-10 rounded-full bg-white border border-beech/40 text-darkChoc hover:bg-darkChoc hover:text-brass flex items-center justify-center shadow-sm transition-all">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        </button>
+                        <button type="button" onclick="spinWheel(1)" aria-label="Défiler à droite" class="w-10 h-10 rounded-full bg-darkChoc text-brass hover:bg-caramel hover:text-white flex items-center justify-center shadow-sm transition-all">
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Quick Pill Selector -->
+                <div id="mobile-quick-selector" class="flex sm:hidden gap-2 overflow-x-auto no-scrollbar pb-3 mb-2"></div>
+
+                <!-- CARROUSEL EN PERSPECTIVE (FORMAT 1) -->
+                <div id="arc-wheel-stage" class="imm-stage relative w-full rounded-[2rem] overflow-hidden select-none cursor-grab active:cursor-grabbing mb-8">
+                    <div id="arc-hangers-layer" class="absolute inset-0"></div>
+                </div>
+
+                <!-- ALTERNATIVE FORMATS CONTAINER (FORMATS 2, 3, 4) -->
+                <div id="alt-formats-layer" class="hidden mb-8"></div>
+
+                    <!-- =================================================================== -->
+                    <!-- FICHE DÉGUSTATION & SÉLECTEUR DE PARTS                              -->
+                    <!-- =================================================================== -->
+                    <div id="podium-showcase-card" class="bg-white rounded-3xl border border-beech/40 shadow-lg overflow-hidden podium-detach-anim">
+                        <div class="bg-darkChoc text-vanilla px-6 py-3 flex flex-wrap items-center justify-between gap-2 border-b border-brass/30">
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="bg-brass text-darkChoc font-extrabold px-2.5 py-0.5 rounded-full text-[10px] uppercase">Fiche Création</span>
+                                <span id="podium-status-text" class="font-medium text-vanilla/90">Personnalisez le format et ajoutez à votre commande</span>
+                            </div>
+                            <span id="podium-lead-badge" class="bg-sage text-white text-[10px] font-extrabold px-3 py-0.5 rounded-full">Précommande 24h</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-12">
+                            <!-- Left: Multi-View Gallery -->
+                            <div class="lg:col-span-5 bg-vanillaDark/55 p-5 sm:p-6 flex flex-col justify-between gap-4">
+                                <div class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-vanillaDark shadow-md">
+                                    <img id="podium-img" src="" alt="" class="w-full h-full object-cover transition-all duration-300">
+                                    <span id="podium-quota-pill" class="hidden absolute bottom-3 left-3 bg-darkChoc/90 text-brass text-[10px] font-extrabold px-3 py-1 rounded-full">
+                                        Quota créneau : 5/6 places
+                                    </span>
+                                </div>
+                                <div id="podium-gallery-thumbs" class="flex items-center gap-2.5"></div>
+                            </div>
+
+                            <!-- Right: Details, Portion Selector, Live Currency Price & Add to Cart -->
+                            <div class="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-5">
+                                <div class="space-y-2.5">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span id="podium-category" class="text-[11px] font-extrabold uppercase tracking-widest text-caramel"></span>
+                                        <span id="podium-stock-info" class="text-[11px] font-bold text-sage"></span>
+                                    </div>
+                                    <h2 id="podium-title" class="font-serif text-2xl sm:text-4xl font-bold text-darkChoc"></h2>
+                                    <p id="podium-desc" class="text-xs sm:text-sm text-cocoaSoft leading-relaxed"></p>
+                                    <div class="p-3 rounded-2xl bg-vanilla border border-beech/30 text-xs">
+                                        <strong class="text-darkChoc">Allergènes & Atelier :</strong>
+                                        <span id="podium-allergens" class="text-caramel font-semibold ml-1"></span>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4 pt-3 border-t border-vanillaDark">
+                                    <div>
+                                        <label class="block text-[11px] font-extrabold uppercase text-cocoaSoft mb-2">Format / Nombre de parts :</label>
+                                        <div id="podium-portions-row" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                                    </div>
+
+                                    <!-- Custom Chocolate Plaque, Candles & Diaspora Gift Note -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-vanilla border border-beech/35">
+                                        <div>
+                                            <label class="block text-[10px] font-extrabold uppercase text-cocoaSoft mb-1">Message sur plaque chocolat (Gratuit)</label>
+                                            <input type="text" id="podium-plaque-text" maxlength="42" placeholder="Ex: Joyeux Anniversaire Amina" class="w-full px-3 py-2 rounded-xl bg-white border border-beech/35 text-xs">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-extrabold uppercase text-cocoaSoft mb-1">Options Atelier & Cadeau</label>
+                                            <select id="podium-gift-option" class="w-full px-3 py-2 rounded-xl bg-white border border-beech/35 text-xs font-bold text-darkChoc">
+                                                <option value="Standard">Boîte signature seule</option>
+                                                <option value="Bougies dorées">Avec bougies dorées (+0 FCFA)</option>
+                                                <option value="Carte cadeau Diaspora">Carte cadeau Diaspora personnalisée</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+                                        <div>
+                                            <span class="block text-[10px] font-bold uppercase text-cocoaSoft">Prix Converti en Direct</span>
+                                            <span id="podium-price" class="font-serif text-2xl sm:text-3xl font-extrabold text-caramel">0 FCFA</span>
+                                            <span id="podium-equiv-price" class="block text-[11px] text-cocoaSoft font-medium"></span>
+                                        </div>
+                                        <button type="button" id="podium-add-to-cart-btn" class="bg-darkChoc hover:bg-caramel text-vanilla font-extrabold px-7 py-4 rounded-full text-xs sm:text-sm shadow-lg transition-all flex items-center gap-2">
+                                            <i data-lucide="shopping-bag" class="w-4 h-4 text-brass"></i>
+                                            <span>Ajouter au Panier</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =============================================================== -->
+                    <!-- SECTION 3 : SOCIAL MEDIA CAMPAIGN DEEP-LINKS BAR                -->
+                    <!-- =============================================================== -->
+                    <div id="social-deeplinks-bar" class="mt-6 bg-gradient-to-r from-darkChoc via-cocoaSoft to-darkChoc text-vanilla rounded-3xl p-5 sm:p-6 border border-brass/35 shadow-lg">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <span class="inline-flex items-center gap-1.5 bg-brass text-darkChoc text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">
+                                    <i data-lucide="share-2" class="w-3 h-3"></i> Sur nos réseaux
+                                </span>
+                                <h3 class="font-serif text-xl sm:text-2xl font-bold mt-1.5">Nos offres du moment</h3>
+                                <p class="text-xs text-vanilla/80 mt-0.5">Nos créations du moment : un clic pour les découvrir, avec la remise appliquée quand il y en a une.</p>
+                            </div>
+                            <div id="social-deeplinks-buttons" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================== MODÈLE « DÉLICE » : plaisirs du jour, chiffres, appels à l'action ===================== -->
+            <section id="dl-specials" class="dl-specials">
+                <div class="dl-specials-sticky">
+                    <div class="dl-splash" id="dl-splash"></div>
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 dl-specials-head">
+                        <span class="dl-overline">À ne pas manquer</span>
+                        <h2 class="dl-h2">Les plaisirs du moment</h2>
+                    </div>
+                    <div class="dl-track-wrap"><div class="dl-track" id="dl-track"></div></div>
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 dl-dots" id="dl-dots"></div>
+                </div>
+            </section>
+
+            <section id="dl-stamps" class="dl-stamps">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 dl-stamps-grid" id="dl-stamps-grid"></div>
+            </section>
+
+
+
+            <!-- ===================================================================== -->
+            <!-- SECTION 7A : BOOKING AGENDA CALENDAR                                  -->
+            <!-- ===================================================================== -->
+            <section id="agenda-section" class="bg-vanillaDark/65 border-b border-beech/25 py-14">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="mb-8">
+                        <span class="text-xs font-extrabold uppercase tracking-widest text-caramel">Événements & commandes spéciales</span>
+                        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-darkChoc mt-1">Réservez une date pour votre événement</h2>
+                        <p class="text-xs sm:text-sm text-cocoaSoft mt-1">Choisissez le jour et le créneau : nous vous confirmons la disponibilité selon le temps de préparation.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                        <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-beech/30 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-serif text-xl font-bold text-darkChoc">Novembre 2026</h3>
+                                <div class="flex items-center gap-3 text-[10px] font-bold">
+                                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sage"></span>Disponible</span>
+                                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>Complet</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] font-extrabold text-cocoaSoft uppercase">
+                                <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+                            </div>
+                            <div id="agenda-calendar-cells" class="grid grid-cols-7 gap-1.5"></div>
+                            <div class="p-3.5 rounded-2xl bg-vanilla border border-beech/30 text-xs space-y-1">
+                                <div class="flex justify-between">
+                                    <span class="text-cocoaSoft">Date sélectionnée :</span>
+                                    <span id="agenda-date-display" class="font-extrabold text-darkChoc">24 Novembre 2026</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-cocoaSoft">Estimation :</span>
+                                    <span id="agenda-estimate-display" class="font-serif text-lg font-extrabold text-sage">75 000 FCFA</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form onsubmit="submitAgendaBooking(event)" class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-beech/30 shadow-md space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-darkChoc mb-1">Type de prestation *</label>
+                                    <select id="agenda-event-type" onchange="updateAgendaEstimate()" class="w-full px-3.5 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs font-bold">
+                                        <option value="wedding">Pièce Montée / Mariage (2 500 FCFA/part • 48h)</option>
+                                        <option value="birthday">Gâteau Anniversaire (2 000 FCFA/part • 24h)</option>
+                                        <option value="corporate">Buffet Entreprise (1 800 FCFA/convive • 24h)</option>
+                                        <option value="tearoom">Salon de Thé Haie Vive (3 500 FCFA/pers. • 2h)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-darkChoc mb-1">Nombre de convives / parts *</label>
+                                    <input type="number" id="agenda-guests" min="4" max="500" value="30" oninput="updateAgendaEstimate()" required class="w-full px-3.5 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs font-bold">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-darkChoc mb-1">Créneau & Quota *</label>
+                                    <select id="agenda-slot" class="w-full px-3.5 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs font-bold">
+                                        <option value="10h00 (4/6 places)">10h00 — Dégustation (4/6 places)</option>
+                                        <option value="14h30 (3/5 places)">14h30 — Livraison / Atelier (3/5 places)</option>
+                                        <option value="17h00 (5/8 places)">17h00 — Salon de Thé (5/8 places)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-darkChoc mb-1">Nom & Téléphone *</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <input type="text" id="agenda-name" required placeholder="Clarisse H." class="px-3 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs">
+                                        <input type="tel" id="agenda-phone" required placeholder="+229 01 97..." class="px-3 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-darkChoc hover:bg-caramel text-white font-extrabold py-3.5 rounded-full text-xs shadow-md transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="calendar-check" class="w-4 h-4 text-brass"></i>
+                                <span>Confirmer la Réservation sur l'Agenda</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================================================================== -->
+            <!-- SECTION 7B : CUSTOMER REVIEWS SUMMARY & LIVE SUBMISSION                 -->
+            <!-- ===================================================================== -->
+            <section id="reviews-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+                <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+                    <div>
+                        <span class="text-xs font-extrabold uppercase tracking-widest text-sage">Retours Clients Vérifiés</span>
+                        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-darkChoc mt-1">Résumé des Retours Clients</h2>
+                    </div>
+                    <button type="button" onclick="switchView('customer')" class="bg-vanillaDark hover:bg-brass/30 text-darkChoc border border-beech/40 px-4 py-2 rounded-full text-xs font-bold">
+                        Ouvrir Compte Client & Fidélité
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-beech/30 shadow-sm space-y-5">
+                        <div class="flex items-center gap-5">
+                            <div class="text-center bg-vanilla p-4 rounded-2xl border border-beech/35 min-w-[105px]">
+                                <span id="avg-rating-score" class="font-serif text-4xl font-extrabold text-darkChoc">—</span>
+                                <span class="text-xs font-bold text-cocoaSoft block">/ 5.0</span>
+                                <div class="text-brass text-xs mt-1 font-bold">★★★★★</div>
+                            </div>
+                            <div class="space-y-1">
+                                <h3 class="font-serif text-xl font-bold text-darkChoc">Satisfaction Client</h3>
+                                <p class="text-xs text-cocoaSoft"><strong id="total-reviews-count">0</strong> avis clients publiés.</p>
+                                <span id="reviews-recommend" class="inline-block bg-sageLight text-sage text-[10px] font-extrabold px-2.5 py-0.5 rounded-full"></span>
+                            </div>
+                        </div>
+                        <div id="rating-breakdown-bars" class="space-y-2 text-xs"></div>
+                    </div>
+
+                    <div class="lg:col-span-7 space-y-4">
+                        <div id="reviews-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                        <form onsubmit="addClientReview(event)" class="bg-white rounded-3xl p-5 border border-beech/30 shadow-sm space-y-3">
+                            <h4 class="font-serif text-lg font-bold text-darkChoc">Publier un retour client</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <input type="text" id="rev-author" required placeholder="Votre nom" class="px-3.5 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs">
+                                <select id="rev-stars" class="px-3.5 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs font-bold">
+                                    <option value="5">5 ★ — Exceptionnel</option>
+                                    <option value="4">4 ★ — Très bon</option>
+                                    <option value="3">3 ★ — Satisfaisant</option>
+                                </select>
+                                <input type="text" id="rev-item" required placeholder="Création goûtée" class="px-3.5 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs">
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" id="rev-comment" required placeholder="Votre commentaire sur la dégustation..." class="flex-1 px-3.5 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs">
+                                <button type="submit" class="bg-darkChoc hover:bg-caramel text-white font-bold px-5 py-2.5 rounded-xl text-xs whitespace-nowrap">Publier</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dl-cta" class="dl-cta">
+                <a href="#arc-carousel-section" class="dl-cta-card -order" onclick="event.preventDefault(); dlScrollTo('arc-carousel-section')">
+                    <span class="dl-cta-kicker">À emporter ou en livraison</span>
+                    <strong class="dl-cta-title">Commander en ligne</strong>
+                    <span class="dl-cta-media"><img id="dl-cta-img1" alt=""></span>
+                    <span class="dl-btn -light">Voir la carte</span>
+                </a>
+                <a href="#agenda-section" class="dl-cta-card -event" onclick="event.preventDefault(); dlScrollTo('agenda-section')">
+                    <span class="dl-cta-kicker">Anniversaire, mariage, baptême</span>
+                    <strong class="dl-cta-title">Réserver pour un événement</strong>
+                    <span class="dl-cta-media"><img id="dl-cta-img2" alt=""></span>
+                    <span class="dl-btn">Choisir une date</span>
+                </a>
+            </section>
+
+            <!-- ===================================================================== -->
+            <!-- SECTION 7C : CONTACT FORM WITH TRACKING TICKET GENERATION            -->
+            <!-- ===================================================================== -->
+            <section id="contact-section" class="bg-vanillaDark/70 border-t border-beech/25 py-14">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <div class="lg:col-span-5 space-y-3">
+                        <span class="text-xs font-extrabold uppercase tracking-widest text-caramel">Assistance & Devis</span>
+                        <h2 class="font-serif text-3xl font-bold text-darkChoc">Contact & Ticket de Suivi</h2>
+                        <p class="text-xs sm:text-sm text-cocoaSoft">Envoyez-nous un message et recevez instantanément un numéro de ticket pour suivre votre demande.</p>
+                        <div id="last-ticket-banner" class="hidden p-3.5 rounded-2xl bg-sageLight border border-sage/35 text-xs font-bold text-sage"></div>
+                        <div id="shop-company" class="hidden space-y-2 pt-2"></div>
+                    </div>
+
+                    <form onsubmit="submitContactTicket(event)" class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-beech/30 shadow-md space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <input type="text" id="contact-name" required placeholder="Nom complet *" class="px-3.5 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs">
+                            <input type="text" id="contact-email" required placeholder="E-mail ou WhatsApp *" class="px-3.5 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs">
+                        </div>
+                        <select id="contact-topic" class="w-full px-3.5 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs font-bold">
+                            <option value="Commande & Livraison">Commande & Livraison</option>
+                            <option value="Devis Mariage / Événement">Devis Mariage / Événement</option>
+                            
+                        </select>
+                        <textarea id="contact-msg" rows="3" required placeholder="Votre message..." class="w-full px-3.5 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs"></textarea>
+                        <button type="submit" class="w-full bg-sage hover:bg-sage/90 text-white font-extrabold py-3.5 rounded-full text-xs shadow-md transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <span>Envoyer & Générer un Ticket de Suivi</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+            <!-- Panier collé en bas (format Commande express) -->
+            <div id="ap-cartbar" class="ap-cartbar"><button type="button" onclick="toggleCartDrawer(true)"><span id="ap-cb-n" class="ap-cb-n">0</span><span>Voir le panier</span><span id="ap-cb-total" class="ap-cb-total"></span></button></div>
+        </main>
+
+
+
+
+        <!-- ========================================================================= -->
+        <!-- VUE 3 : COMPTE CLIENT FIDÉLITÉ & HISTORIQUE COMMANDES                    -->
+        <!-- ========================================================================= -->
+        <section id="view-customer" class="hidden min-h-screen bg-vanilla py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+                <div class="bg-white rounded-3xl p-6 border border-beech/30 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div id="cust-avatar-badge" class="w-14 h-14 rounded-2xl bg-brass text-darkChoc font-serif font-extrabold text-xl flex items-center justify-center shadow">AS</div>
+                        <div>
+                            <h1 id="cust-profile-name" class="font-serif text-2xl font-bold text-darkChoc">Amina Soglo</h1>
+                            <p id="cust-profile-meta" class="text-xs text-cocoaSoft">amina.soglo@cotonou.bj • +229 01 97 12 34 56 • 2FA Vérifié</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-vanilla px-4 py-2 rounded-2xl border border-beech/35">
+                            <span class="block text-[10px] font-bold uppercase text-cocoaSoft">Points Fidélité</span>
+                            <span id="cust-points-val" class="font-serif text-xl font-extrabold text-caramel">450 pts</span>
+                        </div>
+                        <button type="button" onclick="openAuthModal('customer')" class="bg-darkChoc text-vanilla px-4 py-2.5 rounded-xl text-xs font-bold">Connexion Client</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 border border-beech/30 shadow-sm">
+                    <h2 class="font-serif text-2xl font-bold text-darkChoc mb-4">Historique & Suivi de Mes Commandes</h2>
+                    <div id="customer-orders-container" class="space-y-3"></div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 border border-beech/30 shadow-sm">
+                    <h2 class="font-serif text-2xl font-bold text-darkChoc mb-1 flex items-center gap-2"><i data-lucide="bell" class="w-5 h-5 text-caramel"></i>Mes Notifications</h2>
+                    <p class="text-xs text-cocoaSoft mb-4">Messages reçus par WhatsApp, SMS ou e-mail au sujet de vos commandes.</p>
+                    <div id="customer-notifs-container" class="space-y-2"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-darkChoc text-vanilla/85 border-t border-brass/30 py-8 mt-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+                <div>
+                    <span id="footer-brand-title" class="font-serif text-lg font-bold text-brass">Boutique</span>
+                    <p class="text-vanilla/70">Site généré par AYO • Paiement Mobile Money & cartes • Bénin/UEMOA & diaspora</p>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <button type="button" onclick="switchView('client')" class="hover:text-brass">Boutique</button>
+                    <button type="button" onclick="switchView('customer')" class="hover:text-brass">Mon compte & avis</button>
+                    <a href="#contact-section" onclick="switchView('client')" class="hover:text-brass">Contact</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- SLIDE-OVER CART & 2-STEP HYBRID CHECKOUT DRAWER                           -->
+    <!-- ========================================================================= -->
+    <div id="cart-drawer" class="fixed inset-0 bg-darkChoc/75 backdrop-blur-sm z-[65] hidden justify-end" onclick="if(event.target.id==='cart-drawer') toggleCartDrawer(false)">
+        <div class="bg-vanilla w-full max-w-md h-full flex flex-col justify-between shadow-2xl border-l border-brass/35 overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="p-5 border-b border-beech/25 flex items-center justify-between sticky top-0 bg-vanilla z-10">
+                <div>
+                    <h3 class="font-serif text-2xl font-bold text-darkChoc">Panier & Paiement</h3>
+                    <p class="text-[11px] text-cocoaSoft">Tunnel 2 Étapes • Local Bénin/UEMOA & Diaspora</p>
+                </div>
+                <button type="button" aria-label="Fermer le panier" onclick="toggleCartDrawer(false)" class="w-9 h-9 rounded-full bg-white border border-beech/35 flex items-center justify-center">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-4 flex-1">
+                <!-- Free Shipping Progress Bar (35 000 FCFA) -->
+                <div class="bg-white p-3.5 rounded-2xl border border-beech/35 space-y-1.5">
+                    <div class="flex justify-between text-[11px] font-bold">
+                        <span id="free-ship-label" class="text-darkChoc">Livraison offerte dès 35 000 FCFA</span>
+                        <span id="free-ship-pct" class="text-sage">0%</span>
+                    </div>
+                    <div class="w-full h-2 bg-vanilla rounded-full overflow-hidden border border-beech/25">
+                        <div id="free-ship-bar" class="h-full bg-sage transition-all duration-300" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="grid grid-cols-2 gap-1.5 bg-white p-1 rounded-xl border border-beech/30 text-[11px]">
+                    <button type="button" onclick="setCartStep(1)" id="cart-step-btn-1" class="py-1.5 rounded-lg font-extrabold bg-darkChoc text-brass">1. Panier & Upsell</button>
+                    <button type="button" onclick="setCartStep(2)" id="cart-step-btn-2" class="py-1.5 rounded-lg font-bold text-darkChoc">2. Livraison & Paiement</button>
+                </div>
+
+                <!-- STEP 1: CART ITEMS, UPSELL & PROMO -->
+                <div id="cart-step-1-panel" class="space-y-3">
+                    <div id="cart-items-container" class="space-y-2.5"></div>
+
+                    <!-- Smart Impulse Upsell Box -->
+                    <div id="cart-upsell" class="bg-vanillaDark/80 p-3.5 rounded-2xl border border-brass/50 flex items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase text-caramel">Suggestion Atelier</span>
+                            <p id="cart-upsell-name" class="text-xs font-bold text-darkChoc"></p>
+                            <span class="text-[11px] text-cocoaSoft">Idéal pour accompagner votre commande</span>
+                        </div>
+                        <button type="button" id="cart-upsell-btn" class="bg-darkChoc hover:bg-caramel text-brass font-extrabold px-3 py-2 rounded-xl text-[11px] shrink-0">
+                            + Ajouter
+                        </button>
+                    </div>
+
+                    <!-- Promo Code Input -->
+                    <div class="bg-white p-3.5 rounded-2xl border border-beech/35">
+                        <label class="block text-[11px] font-bold text-darkChoc mb-1">Code Promo (codes des campagnes réseaux)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="promo-code-input" placeholder="DELICES15" class="flex-1 px-3 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs uppercase font-bold">
+                            <button type="button" onclick="applyPromoCode()" class="bg-darkChoc text-vanilla px-4 py-2 rounded-xl text-xs font-bold">Appliquer</button>
+                        </div>
+                        <p id="promo-status-text" class="hidden text-[11px] mt-1 font-bold"></p>
+                    </div>
+
+                    <button type="button" onclick="setCartStep(2)" class="w-full bg-darkChoc hover:bg-caramel text-vanilla font-extrabold py-3.5 rounded-full text-xs shadow flex items-center justify-center gap-2">
+                        <span>Continuer vers Livraison & Paiement</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-brass"></i>
+                    </button>
+                </div>
+
+                <!-- STEP 2: DELIVERY DATE, SLOT QUOTA, ZONE & HYBRID PAYMENT -->
+                <form id="cart-step-2-panel" onsubmit="submitCheckoutPayment(event)" class="hidden bg-white p-4 rounded-2xl border border-beech/35 space-y-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-cocoaSoft mb-1">Date souhaitée *</label>
+                            <input type="date" id="checkout-date" value="2026-11-24" onchange="validateDeliverySlotQuota()" required class="w-full px-2.5 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-cocoaSoft mb-1">Créneau Quota *</label>
+                            <select id="checkout-slot" onchange="validateDeliverySlotQuota()" class="w-full px-2.5 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs font-bold">
+                                <option value="09h-11h" data-rem="4">09h–11h (4/6 places)</option>
+                                <option value="12h-15h" data-rem="3">12h–15h (3/6 places)</option>
+                                <option value="16h-19h" data-rem="5">16h–19h (5/8 places)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p id="slot-quota-alert" class="text-[11px] text-sage font-semibold"></p>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl border border-beech/35 bg-vanilla text-xs font-bold cursor-pointer">
+                            <input type="radio" name="fulfillment" value="pickup" checked onchange="recalculateTotals()">
+                            <span>Retrait Atelier (0)</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl border border-beech/35 bg-vanilla text-xs font-bold cursor-pointer">
+                            <input type="radio" name="fulfillment" value="delivery" onchange="recalculateTotals()">
+                            <span>Livraison Zone</span>
+                        </label>
+                    </div>
+
+                    <div id="delivery-zone-box" class="hidden">
+                        <label class="block text-[10px] font-extrabold uppercase text-cocoaSoft mb-1">Zone de livraison</label>
+                        <select id="delivery-zone" onchange="recalculateTotals()" class="w-full px-3 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs font-bold">
+                            <option value="1000">Haie Vive (Cotonou) — +1 000 FCFA</option>
+                            <option value="1200">Fidjrossè (Cotonou) — +1 200 FCFA</option>
+                            <option value="1200">Cadjèhoun (Cotonou) — +1 200 FCFA</option>
+                            <option value="1500">Akpakpa (Cotonou) — +1 500 FCFA</option>
+                            <option value="2000">Calavi — +2 000 FCFA</option>
+                            <option value="3500">Parakou — +3 500 FCFA</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="checkout-client-name" required placeholder="Nom complet *" class="px-3 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs">
+                        <input type="tel" id="checkout-client-phone" required placeholder="Téléphone / WhatsApp *" class="px-3 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs">
+                    </div>
+
+                    <!-- Payment Region Switch: Local Benin/UEMOA vs International Diaspora -->
+                    <div>
+                        <div class="grid grid-cols-2 gap-1.5 bg-vanilla p-1 rounded-xl border border-beech/30 mb-2">
+                            <button type="button" onclick="setPaymentRegion('local')" id="pay-reg-local" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-darkChoc text-brass">
+                                Local Bénin / UEMOA
+                            </button>
+                            <button type="button" onclick="setPaymentRegion('international')" id="pay-reg-intl" class="py-1.5 rounded-lg text-[11px] font-bold text-darkChoc">
+                                International Diaspora
+                            </button>
+                        </div>
+                        <select id="checkout-payment-method" aria-label="Moyen de paiement" class="w-full px-3 py-2.5 rounded-xl bg-vanilla border border-beech/35 text-xs font-bold text-darkChoc"></select>
+                    </div>
+
+                    <!-- Totals Breakdown -->
+                    <div class="pt-2 border-t border-vanillaDark space-y-1 text-xs">
+                        <div class="flex justify-between text-cocoaSoft"><span>Sous-total :</span><span id="sum-subtotal" class="font-bold">0 FCFA</span></div>
+                        <div id="sum-discount-row" class="hidden flex justify-between text-sage font-bold"><span id="sum-discount-label">Remise Promo :</span><span id="sum-discount">-0 FCFA</span></div>
+                        <div class="flex justify-between text-cocoaSoft"><span>Livraison :</span><span id="sum-shipping" class="font-bold">0 FCFA</span></div>
+                        <div class="flex justify-between text-base font-extrabold text-darkChoc pt-2 border-t border-beech/30">
+                            <span>Total à Payer :</span>
+                            <div class="text-right">
+                                <span id="sum-total" class="font-serif text-caramel block">0 FCFA</span>
+                                <span id="sum-total-intl" class="text-[10px] text-cocoaSoft font-semibold"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button type="button" onclick="setCartStep(1)" class="px-4 py-3.5 rounded-full bg-vanilla border border-beech/40 text-darkChoc font-bold text-xs">Retour</button>
+                        <button type="submit" class="flex-1 bg-sage hover:bg-sage/90 text-white font-extrabold py-3.5 rounded-full text-xs shadow-lg transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                            <span>Payer & Confirmer</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Transaction Receipt Box + WhatsApp Direct Tracking -->
+                <div id="tx-receipt-box" class="hidden bg-sageLight border border-sage/40 rounded-2xl p-4 text-xs space-y-2.5 animate-fade-up">
+                    <div class="flex items-center justify-between font-extrabold text-sage">
+                        <span>✓ TRANSACTION VALIDÉE</span>
+                        <span id="tx-receipt-ref" class="font-mono">DS-2026-901</span>
+                    </div>
+                    <p id="tx-receipt-details" class="text-darkChoc font-semibold"></p>
+                    <p class="text-[11px] text-cocoaSoft">Recette BOM déduite automatiquement des stocks d'ingrédients.</p>
+                    <button type="button" id="tx-invoice-btn" class="hidden w-full bg-white border border-sage/40 text-sage font-extrabold py-2.5 px-4 rounded-xl text-xs">Voir la facture</button>
+                    <a id="tx-whatsapp-link" href="https://wa.me/2290197000000" target="_blank" rel="noopener" class="w-full bg-[#25D366] hover:opacity-95 text-white font-extrabold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow">
+                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                        <span>Recevoir le Suivi sur WhatsApp</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- AUTH MODAL (STEP 1: EMAIL/PASS + LIVE SHA-256 | STEP 2: 6-DIGIT 2FA OTP)  -->
+    <!-- ========================================================================= -->
+    <div id="auth-modal" class="fixed inset-0 bg-darkChoc/80 backdrop-blur-sm z-[75] hidden items-center justify-center p-4" onclick="if(event.target.id==='auth-modal') closeAuthModal()">
+        <div id="auth-card" class="bg-vanilla max-w-md w-full rounded-3xl p-6 sm:p-7 shadow-2xl border border-brass/40 animate-fade-up" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <span id="auth-kicker" class="text-[10px] font-extrabold uppercase tracking-widest text-sage bg-sageLight px-2.5 py-0.5 rounded-full">Compte client</span>
+                    <h3 id="auth-title" class="font-serif text-2xl font-bold text-darkChoc mt-1">Bienvenue</h3>
+                </div>
+                <button type="button" id="auth-close-btn" aria-label="Fermer" onclick="closeAuthModal()" class="text-cocoaSoft hover:text-darkChoc"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <!-- Choix Entreprise / Client (fenêtre client uniquement) -->
+
+            <!-- Onglets Se connecter / Créer un compte -->
+            <div id="auth-mode-tabs" class="grid grid-cols-2 gap-1.5 bg-white p-1 rounded-2xl border border-beech/35 mb-5">
+                <button type="button" id="auth-tab-login" onclick="showAuthMode('login')" class="py-2.5 rounded-xl text-xs font-extrabold bg-darkChoc text-brass">Se connecter</button>
+                <button type="button" id="auth-tab-signup" onclick="showAuthMode('signup')" class="py-2.5 rounded-xl text-xs font-bold text-darkChoc">Créer un compte</button>
+            </div>
+
+            <!-- CONNEXION -->
+            <form id="auth-login" onsubmit="submitLogin(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-darkChoc mb-1">E-mail</label>
+                    <input type="email" id="auth-email" required autocomplete="username" placeholder="vous@entreprise.bj" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-beech/35 text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-darkChoc mb-1">Mot de passe</label>
+                    <div class="relative">
+                        <input type="password" id="auth-password" required autocomplete="current-password" placeholder="Votre mot de passe" class="w-full px-3.5 py-2.5 pr-16 rounded-xl bg-white border border-beech/35 text-xs">
+                        <button type="button" onclick="togglePwd('auth-password', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-caramel px-2 py-1">Afficher</button>
+                    </div>
+                </div>
+                <p id="auth-error-login" class="hidden text-[11px] font-bold text-red-600"></p>
+                <button type="submit" class="w-full bg-darkChoc hover:bg-caramel text-white font-extrabold py-3 rounded-xl text-xs shadow">Se connecter</button>
+                <div id="auth-demo-block" class="space-y-2">
+                    <div class="flex items-center gap-2 text-[10px] font-bold text-cocoaSoft"><span class="flex-1 h-px bg-beech/40"></span>ou<span class="flex-1 h-px bg-beech/40"></span></div>
+                    <button type="button" onclick="demoLogin()" class="w-full bg-white hover:bg-vanillaDark text-darkChoc border border-beech/40 font-bold py-2.5 rounded-xl text-xs">Essayer avec le compte démo (Délices Sucrés)</button>
+                    <p class="text-center text-[11px] text-cocoaSoft">Pas encore de compte ? <button type="button" onclick="showAuthMode('signup')" class="font-extrabold text-caramel underline">Créer mon compte entreprise</button></p>
+                </div>
+            </form>
+
+            <!-- INSCRIPTION — ÉTAPE 1 : LE COMPTE -->
+            <form id="auth-signup1" onsubmit="submitSignupStep1(event)" class="hidden space-y-3">
+                <div class="flex items-center gap-2 text-[10px] font-extrabold uppercase text-cocoaSoft">
+                    <span class="w-5 h-5 rounded-full bg-darkChoc text-brass flex items-center justify-center">1</span>Votre compte
+                    <span class="flex-1 h-px bg-beech/40"></span>
+                    <span class="w-5 h-5 rounded-full bg-white border border-beech/40 flex items-center justify-center">2</span>Votre entreprise
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-darkChoc mb-1">Nom et prénom</label>
+                    <input type="text" id="su-name" required placeholder="Ex : Ruth Adjovi" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-beech/35 text-xs">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-darkChoc mb-1">E-mail</label>
+                        <input type="email" id="su-email" required placeholder="vous@entreprise.bj" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-beech/35 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-darkChoc mb-1">Téléphone / WhatsApp</label>
+                        <input type="tel" id="su-phone" required placeholder="+229 01 ..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-beech/35 text-xs">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-darkChoc mb-1">Mot de passe</label>
+                    <div class="relative">
+                        <input type="password" id="su-pass" required oninput="updatePwdStrength()" placeholder="8 caractères minimum, dont 1 chiffre" class="w-full px-3.5 py-2.5 pr-16 rounded-xl bg-white border border-beech/35 text-xs">
+                        <button type="button" onclick="togglePwd('su-pass', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-caramel px-2 py-1">Afficher</button>
+                    </div>
+                    <div class="mt-1.5 flex items-center gap-2">
+                        <div class="flex-1 h-1.5 rounded-full bg-white border border-beech/25 overflow-hidden"><div id="su-strength-bar" class="h-full w-0 transition-all"></div></div>
+                        <span id="su-strength-label" class="text-[10px] font-bold text-cocoaSoft w-20 text-right"></span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-darkChoc mb-1">Confirmer le mot de passe</label>
+                    <input type="password" id="su-pass2" required class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-beech/35 text-xs">
+                </div>
+                <label class="flex items-start gap-2 p-2.5 rounded-xl bg-white border border-beech/30 text-[11px] text-darkChoc cursor-pointer">
+                    <input type="checkbox" id="su-2fa" class="mt-0.5 w-4 h-4 accent-[#2E6F40]">
+                    <span><strong>Double authentification (facultatif)</strong><br><span class="text-cocoaSoft">Un code SMS vous sera demandé à chaque connexion.</span></span>
+                </label>
+                <p id="auth-error-su1" class="hidden text-[11px] font-bold text-red-600"></p>
+                <button type="submit" class="w-full bg-darkChoc hover:bg-caramel text-white font-extrabold py-3 rounded-xl text-xs shadow">Continuer</button>
+                <p class="text-center text-[11px] text-cocoaSoft">Déjà un compte ? <button type="button" onclick="showAuthMode('login')" class="font-extrabold text-caramel underline">Se connecter</button></p>
+            </form>
+
+            <!-- INSCRIPTION — ÉTAPE 2 : L'ENTREPRISE -->
+            <form id="auth-signup2" onsubmit="submitSignupStep2(event)" class="hidden space-y-3">
+                <div class="flex items-center gap-2 text-[10px] font-extrabold uppercase text-cocoaSoft">
+                    <span class="w-5 h-5 rounded-full bg-sage text-white flex items-center justify-center">✓</span>Votre compte
+                    <span class="flex-1 h-px bg-sage/50"></span>
+                    <span class="w-5 h-5 rounded-full bg-darkChoc text-brass flex items-center justify-center">2</span>Votre entreprise
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-darkChoc mb-1">Nom de l'entreprise / enseigne</label>
+                    <input type="text" id="su-biz-name" required maxlength="40" placeholder="Ex : Pâtisserie La Lagune" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-beech/35 text-xs">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-darkChoc mb-1">Ville / quartier</label>
+                        <input type="text" id="su-biz-city" required placeholder="Cotonou — Fidjrossè" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-beech/35 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-darkChoc mb-1">Activité</label>
+                        <select id="su-biz-spec" class="w-full px-3 py-2.5 rounded-xl bg-white border border-beech/35 text-xs font-bold">
+                            <option>Pâtisserie</option><option>Boulangerie-Pâtisserie</option><option>Traiteur & Événements</option><option>Restaurant</option><option>Salon de thé</option><option>Glacier</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-darkChoc mb-1.5">Présentation de votre vitrine</label>
+                    <div class="grid grid-cols-2 gap-2 text-[11px] font-bold">
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-beech/35 cursor-pointer has-[:checked]:border-darkChoc has-[:checked]:bg-vanillaDark"><input type="radio" name="su-format" value="1" checked class="accent-[#231712]">Éditorial chic</label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-beech/35 cursor-pointer has-[:checked]:border-darkChoc has-[:checked]:bg-vanillaDark"><input type="radio" name="su-format" value="2" class="accent-[#231712]">Coloré & gourmand</label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-beech/35 cursor-pointer has-[:checked]:border-darkChoc has-[:checked]:bg-vanillaDark"><input type="radio" name="su-format" value="3" class="accent-[#231712]">Sombre cinématique</label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-beech/35 cursor-pointer has-[:checked]:border-darkChoc has-[:checked]:bg-vanillaDark"><input type="radio" name="su-format" value="4" class="accent-[#231712]">Commande express</label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-beech/35 cursor-pointer has-[:checked]:border-darkChoc has-[:checked]:bg-vanillaDark"><input type="radio" name="su-format" value="5" class="accent-[#231712]">Luxe en chapitres</label>
+                    </div>
+                </div>
+                <p id="auth-error-su2" class="hidden text-[11px] font-bold text-red-600"></p>
+                <div class="flex gap-2">
+                    <button type="button" onclick="showSignupStep(1)" class="px-4 py-3 rounded-xl bg-white border border-beech/40 text-darkChoc font-bold text-xs">Retour</button>
+                    <button type="submit" class="flex-1 bg-sage hover:bg-sage/90 text-white font-extrabold py-3 rounded-xl text-xs shadow">Créer mon espace entreprise</button>
+                </div>
+            </form>
+
+            <!-- CODE 2FA (seulement si activé sur le compte) -->
+            <form id="auth-step2" onsubmit="submitAuthStep2(event)" class="hidden space-y-3.5">
+                <div class="p-3.5 rounded-2xl bg-sageLight border border-sage/30 text-xs space-y-1">
+                    <span class="font-extrabold text-sage block">Code à 6 chiffres envoyé par SMS au <span id="auth-masked-phone" class="font-mono">+229 •• •• •• 56</span>.</span>
+                    <p class="text-[11px] text-cocoaSoft">Valable <strong id="auth-otp-timer" class="font-mono text-darkChoc">05:00</strong> • Essais restants : <strong id="auth-otp-left" class="text-darkChoc">5</strong></p>
+                </div>
+                <div id="auth-otp-boxes" class="grid grid-cols-6 gap-2">
+                    <input inputmode="numeric" maxlength="1" aria-label="Chiffre 1 du code" autocomplete="one-time-code" class="otp-box w-full aspect-square text-center rounded-xl bg-white border-2 border-beech/40 focus:border-darkChoc focus:outline-none text-lg font-mono font-extrabold">
+                    <input inputmode="numeric" maxlength="1" aria-label="Chiffre 2 du code" autocomplete="off" class="otp-box w-full aspect-square text-center rounded-xl bg-white border-2 border-beech/40 focus:border-darkChoc focus:outline-none text-lg font-mono font-extrabold">
+                    <input inputmode="numeric" maxlength="1" aria-label="Chiffre 3 du code" autocomplete="off" class="otp-box w-full aspect-square text-center rounded-xl bg-white border-2 border-beech/40 focus:border-darkChoc focus:outline-none text-lg font-mono font-extrabold">
+                    <input inputmode="numeric" maxlength="1" aria-label="Chiffre 4 du code" autocomplete="off" class="otp-box w-full aspect-square text-center rounded-xl bg-white border-2 border-beech/40 focus:border-darkChoc focus:outline-none text-lg font-mono font-extrabold">
+                    <input inputmode="numeric" maxlength="1" aria-label="Chiffre 5 du code" autocomplete="off" class="otp-box w-full aspect-square text-center rounded-xl bg-white border-2 border-beech/40 focus:border-darkChoc focus:outline-none text-lg font-mono font-extrabold">
+                    <input inputmode="numeric" maxlength="1" aria-label="Chiffre 6 du code" autocomplete="off" class="otp-box w-full aspect-square text-center rounded-xl bg-white border-2 border-beech/40 focus:border-darkChoc focus:outline-none text-lg font-mono font-extrabold">
+                </div>
+                <p id="auth-error2" class="hidden text-[11px] font-bold text-red-600"></p>
+                <button type="submit" class="w-full bg-sage hover:bg-sage/90 text-white font-extrabold py-3 rounded-xl text-xs shadow">Valider le code</button>
+                <div class="flex items-center justify-between text-[11px]">
+                    <button type="button" onclick="showAuthMode('login')" class="font-bold text-cocoaSoft underline">Retour</button>
+                    <button type="button" id="auth-resend-btn" onclick="resendOtp()" class="font-bold text-caramel underline disabled:opacity-40 disabled:no-underline">Renvoyer le code</button>
+                </div>
+            </form>
+
+            <!-- Simulation du SMS reçu (démo) -->
+            <div id="sms-sim" class="hidden mt-4 p-3 rounded-2xl bg-[#1C1C1E] text-white text-xs shadow-lg">
+                <div class="flex items-center justify-between text-[10px] text-white/60 mb-1"><span>📱 SMS reçu (simulation démo)</span><span>maintenant</span></div>
+                <p><strong>AYO</strong> : votre code de connexion est <strong id="sms-sim-code" class="font-mono text-base tracking-widest text-emerald-300">——————</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- FACTURE NORMALISÉE (APERÇU)                                               -->
+    <!-- ========================================================================= -->
+    <div id="invoice-modal" class="fixed inset-0 bg-darkChoc/80 backdrop-blur-sm z-[80] hidden items-start sm:items-center justify-center p-3 overflow-y-auto" onclick="if(event.target.id==='invoice-modal') closeInvoice()">
+        <div class="bg-vanilla max-w-2xl w-full rounded-3xl p-3 sm:p-4 shadow-2xl border border-brass/40 animate-fade-up my-4">
+            <div id="invoice-sheet" class="bg-white rounded-2xl p-5 sm:p-7 border border-beech/30 overflow-hidden"></div>
+            <div class="flex flex-wrap justify-end gap-2 mt-3">
+                <button type="button" id="invoice-avoir-btn" class="bg-white border border-red-200 text-red-700 font-bold px-4 py-2.5 rounded-xl text-xs">Émettre un avoir (annulation)</button>
+                <a id="invoice-wa-btn" href="#" target="_blank" rel="noopener" class="bg-[#25D366] text-white font-bold px-4 py-2.5 rounded-xl text-xs">Envoyer par WhatsApp</a>
+                <button type="button" onclick="closeInvoice()" class="bg-darkChoc text-white font-bold px-5 py-2.5 rounded-xl text-xs">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Écran plein de connexion / création de compte AYO (adapté du composant « Full Screen Signup ») -->
+    <div id="ayo-auth-screen" class="ayo-auth-screen" role="dialog" aria-modal="true" aria-labelledby="ayo-auth-head" aria-hidden="true">
+        <div class="aas-backdrop" onclick="closeAuthScreen()"></div>
+        <div class="aas-card">
+            <div class="aas-left">
+                <div class="aas-fade"></div>
+                <div class="aas-stripes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <span class="aas-sun" aria-hidden="true"></span>
+                <span class="aas-blob b1" aria-hidden="true"></span>
+                <span class="aas-blob b2" aria-hidden="true"></span>
+                <div class="aas-left-content">
+                    <span class="aas-mark">AYO</span>
+                    <h2 id="ayo-auth-head" class="aas-head">Votre site et vos services, prêts en quelques minutes.</h2>
+                    <ul class="aas-points">
+                        <li>Un site à votre nom, avec votre adresse ayo.io</li>
+                        <li>Paiement Mobile Money, commandes et stock</li>
+                        <li>Factures et publications sur les réseaux</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="aas-right">
+                <button type="button" class="aas-close" onclick="closeAuthScreen()" aria-label="Fermer">×</button>
+                <div id="ayo-auth-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre d'aperçu (visible seulement par l'entreprise qui prévisualise sa boutique) -->
+    <div id="preview-bar" class="hidden fixed bottom-4 left-4 z-[90]">
+        <button type="button" onclick="goToBusinessApp()" class="bg-sage hover:bg-sage/90 text-white font-extrabold px-4 py-3 rounded-full text-xs shadow-xl flex items-center gap-2">← Retour à mon espace AYO</button>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-box" class="fixed bottom-5 right-5 z-[95] flex flex-col gap-2 pointer-events-none"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/commun/00-demarrage.js"></script>
+    <script src="js/boutique/01-separation-boutique-espace-entreprise.js"></script>
+    <script src="js/commun/02-security-html-escaping-anti-xss.js"></script>
+    <script src="js/commun/03-constants-storage-key.js"></script>
+    <script src="js/commun/04-illustrations-vectorielles-integrees-nettes-sans.js"></script>
+    <script src="js/commun/05-catalogue-recipe-bom-bill-of-materials.js"></script>
+    <script src="js/commun/06-4-styles-de-site-un-vrai.js"></script>
+    <script src="js/commun/07-default-persistent-state.js"></script>
+    <script src="js/commun/08-outils-communs-espace-entreprise.js"></script>
+    <script src="js/commun/09-catalogue.js"></script>
+    <script src="js/commun/10-espaces-separes-par-entreprise.js"></script>
+    <script src="js/commun/11-etape-1-galerie-mon-site.js"></script>
+    <script src="js/commun/12-etape-2-gestion-du-compte-achats.js"></script>
+    <script src="js/commun/13-en-tete-du-service-ouvert.js"></script>
+    <script src="js/commun/14-guide-des-3-etapes.js"></script>
+    <script src="js/commun/15-facturation-normalisee-e-mecef-benin-mode.js"></script>
+    <script src="js/commun/16-paiements-en-ligne.js"></script>
+    <script src="js/commun/17-notifications-client.js"></script>
+    <script src="js/commun/18-publicite-reseaux-sociaux.js"></script>
+    <script src="js/boutique/19-retours-clients-reseaux-sociaux.js"></script>
+    <script src="js/commun/20-carrousel.js"></script>
+    <script src="js/commun/21-format-1-vitrine-immersive.js"></script>
+    <script src="js/commun/22-brand-view-navigation.js"></script>
+    <script src="js/commun/23-podium-degustation.js"></script>
+    <script src="js/commun/24-social-media-deep-links.js"></script>
+    <script src="js/commun/25-4-dynamic-site-formats.js"></script>
+    <script src="js/commun/26-format-2-la-carte-qui-tourne.js"></script>
+    <script src="js/commun/27-format-4-coffret-a-composer-on.js"></script>
+    <script src="js/commun/28-create-tenant-modal.js"></script>
+    <script src="js/commun/29-auth-modal-2fa-live-sha-256.js"></script>
+    <script src="js/boutique/30-comptes-inscription-connexion-2fa-facultative.js"></script>
+    <script src="js/commun/31-cart-2-step-hybrid-checkout.js"></script>
+    <script src="js/boutique/32-agenda-reviews-contact-tickets.js"></script>
+    <script src="js/commun/33-customer-account-enterprise-back-office.js"></script>
+    <script src="js/commun/34-animations-apparition-au-defilement-carrousel-au.js"></script>
+    <script src="js/commun/35-services-generes-un-service-par-ecran.js"></script>
+    <script src="js/commun/36-motion-v3-site-vivant.js"></script>
+    <script src="js/commun/37-back-office-services-presentes-dans-le.js"></script>
+    <script src="js/commun/38-format-5-luxe-en-chapitres.js"></script>
+    <script src="js/commun/39-entreprise-sites-connectes.js"></script>
+    <script src="js/commun/40-modele-delice-remplissage-et-mouvements-de.js"></script>
+    <script src="js/commun/41-cloud-base-de-donnees-supabase.js"></script>
+    <script src="js/boutique/42-boite-de-reception-en-ligne.js"></script>
+</body>
+</html>

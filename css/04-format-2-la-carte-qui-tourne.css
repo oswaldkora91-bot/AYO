@@ -1,0 +1,37 @@
+/* AYO — Format 2 : « La carte qui tourne » */
+/* ==================== Format 2 : « La carte qui tourne » ==================== */
+.spin-stage { top: var(--stick, 110px); height: calc(100vh - var(--stick, 110px) - 14px); min-height: 540px; max-height: 860px; background: #1b110d; }
+.spin-bg { background: radial-gradient(circle at 68% 52%, rgba(212,163,115,.32), transparent 55%), radial-gradient(circle at 12% 90%, rgba(200,50,74,.18), transparent 45%), linear-gradient(160deg, #2a1a12, #140c09); }
+.spin-grain { opacity: .18; background-image: radial-gradient(rgba(255,255,255,.35) 1px, transparent 1px); background-size: 4px 4px; mix-blend-mode: overlay; pointer-events: none; }
+.spin-plate { position: absolute; left: 50%; top: 50%; width: min(78vw, 470px); aspect-ratio: 1; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.05) 0 6deg, transparent 6deg 12deg), radial-gradient(circle, #3a2519 0 58%, #2a1a12 59% 62%, rgba(212,163,115,.45) 62.5% 63%, transparent 63.5%); box-shadow: 0 40px 80px -30px rgba(0,0,0,.8), inset 0 0 60px rgba(0,0,0,.5); transform: translate(-50%, -50%); will-change: transform; }
+@media (max-width: 767px) { .spin-plate { width: min(66vw, 250px); } }
+.spin-med { position: absolute; left: 50%; top: 50%; width: min(56vw, 330px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; padding: 0; border: 6px solid rgba(255,248,236,.92); box-shadow: 0 30px 60px -20px rgba(0,0,0,.85), 0 0 0 14px rgba(212,163,115,.12); transform: translate(-50%, -50%); will-change: transform, opacity; cursor: pointer; transition: box-shadow .4s; }
+@media (max-width: 767px) { .spin-med { width: min(46vw, 180px); border-width: 4px; } }
+.spin-med img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; transform: scale(1.06); }
+.spin-med.is-on { box-shadow: 0 40px 70px -20px rgba(0,0,0,.9), 0 0 0 14px rgba(212,163,115,.25), 0 0 90px rgba(212,163,115,.35); }
+.spin-text { pointer-events: none; }
+.spin-text.is-on { pointer-events: auto; }
+.spin-line { opacity: 0; transform: translateY(22px); filter: blur(6px); transition: opacity .45s, transform .6s cubic-bezier(.2,.9,.2,1), filter .45s; }
+.spin-text.is-on .spin-line { opacity: 1; transform: none; filter: none; transition-delay: calc(var(--d) * 70ms + 120ms); }
+.spin-w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .08em; }
+.spin-w > span { display: inline-block; opacity: 0; transform: translateY(115%) rotate(6deg); transition: transform .7s cubic-bezier(.2,.9,.2,1), opacity .3s; }
+.spin-text.is-on .spin-w > span { opacity: 1; transform: none; transition-delay: calc(var(--d) * 60ms + 60ms); }
+.spin-chip, .spin-garnish { position: absolute; left: 50%; top: 50%; opacity: 0; transform: translate(-50%, -50%) translate(var(--fx), var(--fy)) scale(.4); transition: opacity .45s, transform .9s cubic-bezier(.2,1.2,.3,1); pointer-events: none; }
+.spin-chip { white-space: nowrap; font-size: 11px; font-weight: 800; color: #231712; background: #FFF8EC; padding: 6px 12px; border-radius: 9999px; box-shadow: 0 10px 24px -8px rgba(0,0,0,.6); }
+.spin-garnish { width: 34px; height: 34px; }
+.spin-garnish svg { width: 100%; height: 100%; animation: spinBob 3.2s ease-in-out infinite; animation-delay: calc(var(--k) * -.5s); filter: drop-shadow(0 6px 8px rgba(0,0,0,.45)); }
+.spin-chip.is-on, .spin-garnish.is-on { opacity: 1; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--orbit, 0deg)) scale(1); transition-delay: calc(var(--k) * 80ms + 180ms); }
+.spin-garnish.is-on { transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(calc(var(--r) + var(--orbit, 0deg) * 3)) scale(1); }
+@media (max-width: 767px) { .spin-chip { font-size: 9px; padding: 4px 9px; } .spin-chip.is-on { transform: translate(-50%, -50%) translate(calc(var(--x) * .5), calc(var(--y) * .62)) scale(.95); } .spin-garnish.is-on { transform: translate(-50%, -50%) translate(calc(var(--x) * .55), calc(var(--y) * .55)) rotate(var(--r)) scale(.8); } }
+.spin-dot { width: 8px; height: 8px; border-radius: 9999px; background: rgba(255,248,236,.25); transition: width .35s cubic-bezier(.2,.9,.2,1), background-color .3s; }
+.spin-dot.is-on { width: 26px; background: #D4A373; }
+.spin-progress { transform: scaleX(0); transition: transform .12s linear; }
+.spin-hint { animation: spinHint 1.6s ease-in-out infinite; transition: opacity .3s; }
+.spin-flip { animation: spinFlip .5s cubic-bezier(.2,.9,.2,1); }
+.spin-add { transition: transform .2s; } .spin-add:active { transform: scale(.9); }
+@keyframes spinBob { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(12deg); } }
+@keyframes spinHint { 0%,100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+@keyframes spinFlip { 0% { transform: translateY(-100%) rotateX(90deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+/* Vol d'image (panier / coffret) */
+.fly-clone { position: fixed; z-index: 120; border-radius: 9999px; object-fit: cover; pointer-events: none; box-shadow: 0 20px 40px -10px rgba(0,0,0,.5); border: 3px solid #fff; }

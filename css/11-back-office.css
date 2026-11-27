@@ -1,0 +1,38 @@
+/* AYO — Back-office */
+/* ==================== Back-office ==================== */
+.bo-kpis { background: transparent !important; border: 0 !important; gap: .8rem; overflow: visible !important; }
+.bo-kpis > div { border: 1px solid rgba(212,163,115,.3) !important; background: #fff; border-radius: 1.2rem; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto auto; column-gap: .8rem; align-items: center; transition: transform .3s cubic-bezier(.2,.9,.2,1), box-shadow .3s; }
+.bo-kpis > div:hover { transform: translateY(-3px); box-shadow: 0 20px 34px -22px rgba(35,23,18,.55); }
+.bo-kpis .kpi-ico { grid-row: 1 / span 3; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.bo-kpis .kpi-ico svg { width: 20px; height: 20px; }
+.bo-kpis > div > span:not(.kpi-ico) { text-transform: none !important; letter-spacing: 0 !important; font-size: 12px !important; font-weight: 600 !important; }
+.bo-kpis > div > p { font-size: 24px !important; line-height: 1.1; }
+.bo-kpis .kpi-hint { font-size: 11px; color: #8a7365; margin-top: .1rem; }
+@media (max-width: 1023px) { .bo-kpis > div { grid-template-columns: 1fr; } .bo-kpis .kpi-ico { grid-row: auto; width: 34px; height: 34px; border-radius: 11px; margin-bottom: .4rem; } .bo-kpis > div > p { font-size: 20px !important; } }
+
+/* Tableau des commandes : statuts en pastilles, cartes sur téléphone */
+#bo-orders-tbody tr { transition: background-color .2s; }
+#bo-orders-tbody tr:hover { background: #FBF6EE; }
+.st-select { appearance: none; -webkit-appearance: none; border: 0 !important; border-radius: 9999px !important; padding: .4rem 1.9rem .4rem .8rem !important; font-weight: 800; font-size: 12px; cursor: pointer; background-repeat: no-repeat; background-position: right .6rem center; background-size: 10px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23231712' stroke-width='1.6'/%3E%3C/svg%3E"); }
+.st-select[data-st="En attente"] { background-color: #FCEFD9; color: #8A5A12; }
+.st-select[data-st="En préparation"] { background-color: #E6EEF8; color: #234A7A; }
+.st-select[data-st="Prête"] { background-color: #E5F2E8; color: #2E6F40; }
+.st-select[data-st="Livrée"] { background-color: #EFEAE6; color: #6b5446; }
+.inv-btn { display: inline-flex; align-items: center; gap: .3rem; margin-top: .4rem; font-family: Inter, sans-serif; font-size: 11px; font-weight: 800; padding: .3rem .6rem; border-radius: 9999px; text-decoration: none !important; }
+.inv-btn.make { background: #231712; color: #F6D99A; }
+.inv-btn.make:hover { background: #A0522D; color: #fff; }
+.inv-btn.done { background: #E5F2E8; color: #2E6F40; }
+@media (max-width: 767px) {
+    #bo-orders-tbody tr { display: grid; grid-template-columns: 1fr auto; gap: .2rem .8rem; padding: .9rem .4rem; border-bottom: 1px solid rgba(212,163,115,.25); }
+    #bo-orders-tbody td { padding: 0 !important; border: 0 !important; }
+    #bo-orders-tbody td:nth-child(1) { grid-column: 1; }
+    #bo-orders-tbody td:nth-child(5) { grid-column: 2; grid-row: 1; text-align: right; }
+    #bo-orders-tbody td:nth-child(2), #bo-orders-tbody td:nth-child(3), #bo-orders-tbody td:nth-child(4) { grid-column: 1 / -1; font-size: 12px; }
+    #bo-orders-tbody td:nth-child(6) { grid-column: 1 / -1; margin-top: .4rem; }
+    #bo-orders-tbody td[colspan] { grid-column: 1 / -1; }
+    table:has(#bo-orders-tbody) thead { display: none; }
+    table:has(#bo-orders-tbody), #bo-orders-tbody { display: block; width: 100%; }
+    #bo-orders-tbody td { white-space: normal; word-break: break-word; }
+    #bo-panel-orders { padding: 1.1rem !important; }
+}
+@media (prefers-reduced-motion: reduce) { .hdr-menu, .hdr-burger span, .bo-kpis > div, .cat-btn { transition: none !important; } }

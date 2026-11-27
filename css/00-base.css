@@ -1,0 +1,59 @@
+/* AYO — Base : couleurs, typographie, éléments communs */
+:root { --c-vanilla: 251 247 240; --c-vanillaDark: 241 231 214; --c-darkChoc: 35 23 18; --c-cocoaSoft: 62 43 34; --c-caramel: 140 74 39; --c-brass: 212 163 115; --c-beech: 198 139 89; --c-sage: 46 111 64; --c-sageLight: 231 242 234; }
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #FBF7F0;
+    color: #231712;
+    overflow-x: hidden;
+}
+h1, h2, h3, .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Mobile 390px Responsive Viewport Frame */
+.mobile-viewport-frame {
+    max-width: 390px !important;
+    margin: 16px auto !important;
+    border: 8px solid #231712;
+    border-radius: 38px;
+    box-shadow: 0 28px 65px -15px rgba(35, 23, 18, 0.45);
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 86vh;
+}
+
+/* Classic Horizontal Slider Card Hover */
+.classic-pastry-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.classic-pastry-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 34px -10px rgba(35, 23, 18, 0.18);
+}
+
+/* Carrousel en perspective (Format 1) */
+.arc-card { transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease; will-change: transform; backface-visibility: hidden; }
+.arc-card-inner { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
+.arc-card.is-center:hover .arc-card-inner { transform: translateY(-5px); }
+.arc-card.is-center .arc-card-inner { box-shadow: 0 26px 40px -18px rgba(35, 23, 18, 0.45); }
+.arc-shade { transition: opacity 0.35s ease; }
+#arc-wheel-stage.dragging .arc-card, #arc-wheel-stage.dragging .arc-shade { transition: none; }
+.arc-card img { image-rendering: auto; }
+
+@keyframes podiumDetachIn {
+    0% { opacity: 0; transform: translateY(22px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.podium-detach-anim {
+    animation: podiumDetachIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+    animation: fadeUp 0.25s ease-out forwards;
+}

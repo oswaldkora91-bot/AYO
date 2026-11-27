@@ -1,0 +1,61 @@
+/* AYO — Écran plein connexion / inscription */
+/* ==================== Écran plein connexion / inscription ==================== */
+.ayo-auth-screen { position: fixed; inset: 0; z-index: 240; display: flex; align-items: center; justify-content: center; padding: 1rem; visibility: hidden; pointer-events: none; }
+.ayo-auth-screen.open { visibility: visible; pointer-events: auto; }
+html.aas-lock { overflow: hidden; }
+.aas-backdrop { position: absolute; inset: 0; background: rgba(251,247,240,.92); backdrop-filter: blur(10px); opacity: 0; transition: opacity .4s; }
+.ayo-auth-screen.open .aas-backdrop { opacity: 1; }
+.aas-card { position: relative; width: 100%; max-width: 64rem; max-height: calc(100vh - 2rem); display: flex; overflow: hidden; border-radius: 1.75rem; background: #FBF7F0; box-shadow: 0 50px 100px -40px rgba(35,23,18,.6), 0 0 0 1px rgba(212,163,115,.3); opacity: 0; transform: translateY(24px) scale(.97); transition: opacity .45s, transform .7s cubic-bezier(.2,1,.3,1); }
+.ayo-auth-screen.open .aas-card { opacity: 1; transform: none; }
+
+/* Colonne gauche : fond sombre, bandes de verre et soleil doré */
+.aas-left { position: relative; width: 50%; min-height: 36rem; background: #231712; color: #FBF7F0; overflow: hidden; border-bottom-left-radius: 1.75rem; }
+.aas-fade { position: absolute; inset: 0; z-index: 3; background: linear-gradient(0deg, transparent 30%, #231712 92%); pointer-events: none; }
+.aas-stripes { position: absolute; inset: 0; z-index: 2; display: flex; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); pointer-events: none; }
+.aas-stripes i { flex: 1; height: 100%; opacity: .32; background: linear-gradient(90deg, rgba(255,255,255,0), #000 69%, rgba(255,255,255,.19)); transform: translateY(100%); transition: transform 1s cubic-bezier(.2,1,.3,1); }
+.ayo-auth-screen.open .aas-stripes i { transform: none; }
+.aas-stripes i:nth-child(2) { transition-delay: .06s; } .aas-stripes i:nth-child(3) { transition-delay: .12s; } .aas-stripes i:nth-child(4) { transition-delay: .18s; } .aas-stripes i:nth-child(5) { transition-delay: .24s; } .aas-stripes i:nth-child(6) { transition-delay: .3s; }
+.aas-sun { position: absolute; z-index: 1; left: 50%; bottom: -5rem; width: 18rem; height: 18rem; margin-left: -9rem; border-radius: 9999px; background: radial-gradient(circle at 50% 40%, #F6D99A, #D4A373 45%, #A0522D 80%); transform: translateY(60%) scale(.7); transition: transform 1.3s cubic-bezier(.2,1,.3,1) .2s; animation: aasGlow 6s ease-in-out infinite; }
+.ayo-auth-screen.open .aas-sun { transform: none; }
+.aas-blob { position: absolute; z-index: 1; bottom: 0; width: 8rem; height: 5rem; border-radius: 9999px; background: #FBF7F0; }
+.aas-blob.b1 { left: 18%; animation: aasDrift 9s ease-in-out infinite; }
+.aas-blob.b2 { right: 14%; animation: aasDrift 11s ease-in-out infinite reverse; }
+.aas-left-content { position: relative; z-index: 4; padding: clamp(2rem, 4vw, 3rem); display: flex; flex-direction: column; gap: 1.2rem; }
+.aas-mark { align-self: flex-start; font-family: "Playfair Display", serif; font-weight: 700; font-size: 18px; color: #231712; background: #F6D99A; padding: .25rem .7rem; border-radius: .6rem; }
+.aas-head { font-family: "Playfair Display", serif; font-weight: 700; font-size: clamp(26px, 3vw, 38px); line-height: 1.1; letter-spacing: -.01em; max-width: 18ch; }
+.aas-points { display: flex; flex-direction: column; gap: .5rem; font-size: 14px; color: rgba(251,247,240,.82); }
+.aas-points li { display: flex; align-items: center; gap: .6rem; opacity: 0; transform: translateX(-14px); transition: opacity .5s, transform .7s cubic-bezier(.2,1,.3,1); }
+.aas-points li::before { content: ""; width: 7px; height: 7px; border-radius: 9999px; background: #D4A373; flex-shrink: 0; }
+.ayo-auth-screen.open .aas-points li { opacity: 1; transform: none; }
+.ayo-auth-screen.open .aas-points li:nth-child(1) { transition-delay: .45s; } .ayo-auth-screen.open .aas-points li:nth-child(2) { transition-delay: .55s; } .ayo-auth-screen.open .aas-points li:nth-child(3) { transition-delay: .65s; }
+@keyframes aasGlow { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.12); } }
+@keyframes aasDrift { 0%,100% { translate: 0 0; } 50% { translate: 14px -4px; } }
+
+/* Colonne droite : le formulaire existant, à plat */
+.aas-right { position: relative; width: 50%; overflow-y: auto; padding: clamp(1.8rem, 4vw, 3rem); }
+.aas-close { position: absolute; right: 1rem; top: 1rem; width: 40px; height: 40px; border-radius: 9999px; font-size: 24px; line-height: 1; color: #4A3428; background: rgba(35,23,18,.06); z-index: 2; transition: background-color .2s, transform .3s; }
+.aas-close:hover { background: rgba(35,23,18,.12); transform: rotate(90deg); }
+#ayo-auth-right #auth-card { max-width: none !important; background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; border-radius: 0 !important; animation: none; }
+#ayo-auth-right #auth-kicker { display: none; }
+#ayo-auth-right #auth-title { font-size: 30px; margin-top: 0; }
+#ayo-auth-right input, #ayo-auth-right select { border-radius: .8rem; }
+#ayo-auth-right input:focus, #ayo-auth-right select:focus { outline: none; box-shadow: 0 0 0 3px rgba(212,163,115,.45); border-color: #A0522D; }
+@media (max-width: 767px) {
+    .ayo-auth-screen { padding: 0; align-items: stretch; }
+    .aas-card { flex-direction: column; max-height: none; height: 100%; border-radius: 0; overflow-y: auto; }
+    .aas-left { width: 100%; min-height: 13rem; flex-shrink: 0; border-radius: 0 0 1.5rem 1.5rem; }
+    .aas-left-content { padding: 1.4rem 1.4rem 4.5rem; gap: .8rem; }
+    .aas-head { font-size: 24px; }
+    .aas-points { display: none; }
+    .aas-sun { width: 11rem; height: 11rem; margin-left: -5.5rem; bottom: -4.5rem; }
+    .aas-blob { width: 5rem; height: 3rem; }
+    .aas-right { width: 100%; overflow: visible; padding: 1.4rem 1.2rem 2rem; }
+    .aas-close { position: fixed; top: .8rem; right: .8rem; color: #F6D99A; background: rgba(255,255,255,.12); }
+}
+@media (prefers-reduced-motion: reduce) { .aas-card, .aas-stripes i, .aas-sun, .aas-points li, .aas-blob { transition: none !important; animation: none !important; transform: none !important; opacity: 1 !important; } }
+
+/* Carte d'appel dans l'accueil, à la place du formulaire */
+.aas-teaser { position: relative; overflow: hidden; border-radius: 1.75rem; background: #231712; color: #FBF7F0; padding: 1.8rem 1.8rem 6.5rem; box-shadow: 0 40px 70px -40px rgba(35,23,18,.8); }
+.aas-teaser .aas-sun { width: 15rem; height: 15rem; margin-left: -7.5rem; bottom: -10rem; transform: none; opacity: .95; }
+.aas-teaser::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 3.2rem, rgba(0,0,0,.35) 3.2rem 4rem); backdrop-filter: blur(1px); }
+.aas-teaser > *:not(.aas-sun) { position: relative; z-index: 2; }

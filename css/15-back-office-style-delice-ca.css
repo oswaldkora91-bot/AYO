@@ -1,0 +1,78 @@
+/* AYO — Back-office, style delice.ca */
+/* ==================== Back-office, style delice.ca ==================== */
+#view-admin { background: var(--dl-cream); }
+.bo-h1 { font-family: "Playfair Display", serif; font-weight: 700; font-size: clamp(38px, 5.6vw, 72px); line-height: .98; letter-spacing: -.02em; color: var(--dl-dark); margin-top: .3rem; }
+.bo-h2 { font-family: "Playfair Display", serif; font-weight: 700; font-size: clamp(30px, 3.8vw, 48px); line-height: 1.02; letter-spacing: -.015em; color: var(--dl-dark); margin-top: .2rem; }
+.bo-lead { font-size: 15px; color: #6b5446; max-width: 56ch; margin-top: .6rem; }
+.bo-wave { display: block; width: min(420px, 80%); height: 26px; margin-top: .8rem; fill: none; stroke: var(--dl-primary); stroke-width: 2.4; stroke-linecap: round; }
+.bo-wave path { stroke-dasharray: 520; stroke-dashoffset: 520; }
+.in .bo-wave path, .bo-head.in .bo-wave path { animation: boWave 1.4s .2s cubic-bezier(.2,.8,.2,1) forwards; }
+.bo-wave path:last-child { opacity: .45; animation-delay: .35s !important; }
+@keyframes boWave { to { stroke-dashoffset: 0; } }
+.bo-corner { position: absolute; right: -2px; top: -2px; width: clamp(110px, 16vw, 200px); fill: var(--dl-primary); opacity: .12; pointer-events: none; }
+
+/* Tableau de bord */
+#bo-panel-home { display: flex; flex-direction: column; gap: clamp(2.5rem, 6vw, 4.5rem); }
+#bo-panel-home.hidden { display: none; }
+.bo-hero { position: relative; padding: clamp(.5rem, 2vw, 1.5rem) 0 0; }
+.bo-stamps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(.8rem, 2vw, 1.6rem); margin-top: clamp(1.6rem, 4vw, 2.6rem); max-width: 860px; }
+.bo-stamp { aspect-ratio: 1; border-radius: 9999px; background: var(--c); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: .8rem; box-shadow: 0 24px 40px -24px rgba(35,23,18,.6); transform: scale(0) rotate(-20deg); transition: transform .9s cubic-bezier(.2,1.5,.3,1), box-shadow .3s; transition-delay: calc(var(--i) * 110ms + .15s); }
+.bo-hero.in .bo-stamp { transform: rotate(var(--r, -5deg)); }
+.bo-stamp:nth-child(even) { --r: 5deg; }
+.bo-hero.in .bo-stamp:hover { transform: rotate(0) scale(1.06); transition-delay: 0s; }
+.bo-stamp b { font-family: "Playfair Display", serif; font-size: clamp(28px, 4vw, 50px); line-height: 1; }
+.bo-stamp.-small b { font-size: clamp(17px, 2.1vw, 26px); }
+.bo-stamp span { font-size: 12px; font-weight: 700; margin-top: .35rem; line-height: 1.2; max-width: 12ch; }
+@media (max-width: 639px) { .bo-stamps { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 360px; } }
+
+/* Une section par étape, des cartes « plaisirs du jour » */
+.bo-group-sec { position: relative; }
+.bo-group-head { display: flex; align-items: flex-start; gap: clamp(.8rem, 2vw, 1.4rem); }
+.bo-group-num { flex-shrink: 0; width: clamp(48px, 6vw, 72px); aspect-ratio: 1; border-radius: 9999px; background: var(--dl-dark); color: #F6D99A; font-family: "Playfair Display", serif; font-weight: 700; font-size: clamp(22px, 3vw, 34px); display: flex; align-items: center; justify-content: center; transform: rotate(-8deg); }
+.bo-rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(240px, 1fr); gap: clamp(1rem, 2vw, 1.6rem); overflow-x: auto; padding: clamp(1.4rem, 3vw, 2.2rem) 2.2rem 1.2rem .3rem; scroll-snap-type: x mandatory; scrollbar-width: thin; }
+@media (min-width: 1280px) { .bo-group-sec:nth-of-type(2) .bo-rail { grid-auto-columns: minmax(0, 1fr); } }
+.bo-svc { position: relative; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 .6rem 1rem; opacity: 0; transform: translateY(40px); transition: opacity .6s, transform .9s cubic-bezier(.2,1.1,.3,1); transition-delay: calc(var(--i) * 90ms); }
+.bo-group-sec.in .bo-svc { opacity: 1; transform: none; }
+.bo-svc-hit { position: absolute; inset: 0; z-index: 3; border-radius: 1.5rem; }
+.bo-svc-hit:focus-visible { outline: 3px solid var(--dl-primary); outline-offset: 4px; }
+.bo-svc-disc { position: relative; width: min(190px, 70%); aspect-ratio: 1; border-radius: 9999px; background: var(--tint); display: flex; align-items: center; justify-content: center; color: var(--dl-dark); box-shadow: inset 0 -14px 30px rgba(35,23,18,.08), 0 0 0 8px #fff, 0 26px 40px -26px rgba(35,23,18,.6); transition: transform .6s cubic-bezier(.2,1.4,.3,1); }
+.bo-svc-disc svg { width: 38%; height: 38%; stroke-width: 1.5; transition: transform .6s cubic-bezier(.2,1.4,.3,1); }
+.bo-svc:hover .bo-svc-disc { transform: translateY(-8px) rotate(-4deg); }
+.bo-svc:hover .bo-svc-disc svg { transform: scale(1.15) rotate(8deg); }
+.bo-svc-stamp { position: absolute; top: .4rem; right: calc(50% - min(95px, 35%) - 18px); z-index: 2; min-width: 74px; aspect-ratio: 1; border-radius: 9999px; background: var(--dl-primary); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: .4rem; transform: rotate(10deg); box-shadow: 0 0 0 5px var(--dl-cream); }
+.bo-svc-stamp b { font-family: "Playfair Display", serif; font-size: 22px; line-height: 1; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bo-svc-stamp em { font-style: normal; font-size: 9px; font-weight: 800; line-height: 1.1; margin-top: .15rem; max-width: 64px; }
+.bo-svc h4 { font-family: "Playfair Display", serif; font-weight: 700; font-size: 24px; color: var(--dl-dark); margin-top: 1.2rem; line-height: 1.1; }
+.bo-svc p { font-size: 13px; color: #6b5446; margin-top: .45rem; max-width: 30ch; line-height: 1.45; }
+.bo-svc-btn { margin-top: 1rem; padding: .7rem 1.3rem; font-size: 13px; }
+.bo-svc:hover .bo-svc-btn { transform: translateY(-3px) rotate(-1deg); background: var(--dl-dark); }
+
+/* En-tête d'un service ouvert */
+.bo-head.hidden { display: none !important; }
+.bo-head { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.bo-head .bo-h2 { font-size: clamp(32px, 4.4vw, 56px); }
+#bo-crumb { text-transform: none !important; letter-spacing: .02em !important; font-size: 13px !important; color: var(--dl-primary) !important; }
+#bo-page-desc { font-size: 15px !important; color: #6b5446 !important; margin-top: .6rem !important; }
+.bo-page-stamp { width: clamp(96px, 11vw, 128px); aspect-ratio: 1; border-radius: 9999px; background: var(--tint, #F6D99A); color: var(--dl-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: .6rem; transform: rotate(-8deg); box-shadow: 0 0 0 6px #fff, 0 20px 34px -22px rgba(35,23,18,.6); }
+.bo-page-stamp.pop { animation: boStampPop .8s cubic-bezier(.2,1.6,.3,1); }
+.bo-page-stamp b { font-family: "Playfair Display", serif; font-size: clamp(24px, 3vw, 36px); line-height: 1; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bo-page-stamp span { font-size: 11px; font-weight: 800; margin-top: .25rem; line-height: 1.15; }
+@keyframes boStampPop { 0% { transform: rotate(-40deg) scale(0); } 100% { transform: rotate(-8deg) scale(1); } }
+@media (max-width: 639px) { .bo-page-stamp { width: 84px; } .bo-page-stamp b { font-size: 22px; } }
+
+/* Menu latéral : entrée « Accueil » et repère actif plus marqué */
+#bo-sidebar .bo-item.is-active { box-shadow: inset 3px 0 0 var(--dl-primary); }
+@media (prefers-reduced-motion: reduce) { .bo-stamp, .bo-svc, .bo-wave path, .bo-page-stamp { transition: none !important; animation: none !important; opacity: 1 !important; stroke-dashoffset: 0 !important; } .bo-hero .bo-stamp { transform: none; } }
+/* Pas de nouvelle entrée quand le contenu ne change pas (ex. ajout au panier) */
+.no-enter .fmt-menu, .no-enter .fmt-menu-rule, .no-enter .fmt-menu-cat, .no-enter .fmt-menu-item, .no-enter .fmt-bento, .no-enter .fmt-counter, .no-enter .fmt-counter-bar { animation: none; }
+
+/* Aperçus animés dans la galerie de modèles */
+.tp-sway { animation: tpSway 5s ease-in-out infinite; }
+.tp-float { animation: immFloat 4s ease-in-out infinite; }
+.tp-menu > div { animation: tpShimmer 2.4s ease-in-out infinite; }
+.tp-menu > div:nth-child(2) { animation-delay: .3s; } .tp-menu > div:nth-child(3) { animation-delay: .6s; } .tp-menu > div:nth-child(4) { animation-delay: .9s; }
+.tp-bento > * { animation: tpPulse 3s ease-in-out infinite; }
+.tp-bento > *:nth-child(2) { animation-delay: .4s; } .tp-bento > *:nth-child(3) { animation-delay: .8s; } .tp-bento > *:nth-child(4) { animation-delay: 1.2s; }
+.tp-list { overflow: hidden; }
+.tp-list > div { animation: tpSlide 4s ease-in-out infinite; }
+.tp-list > div:nth-child(2) { animation-delay: .25s; } .tp-list > div:nth-child(3) { animation-delay: .5s; }
