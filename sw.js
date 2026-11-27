@@ -1,7 +1,7 @@
 // AYO — mode hors connexion (service worker)
 // Garde une copie des fichiers du site sur le téléphone : l'application s'ouvre même sans réseau.
 // Les données (Supabase) ne sont jamais mises en cache : elles viennent toujours du réseau.
-const VERSION = "ayo-d14445c406";
+const VERSION = "ayo-a032566bc0";
 const CDN_CACHE = "ayo-cdn-v1";
 const CORE = [
   "./",

@@ -147,7 +147,7 @@ function updateSvc() {
     const c = _getByIdSafe("svc-count"); if (c) c.textContent = String(Math.min(SVC.n, Math.max(0, shown))).padStart(2, "0");
     const bar = SVC.gen.querySelector(".svc-bar i"); if (bar) bar.style.transform = `scaleX(${Math.max(0, Math.min(1, (f + .5) / (SVC.n + .5))).toFixed(3)})`;
     const txt = _getByIdSafe("svc-text");
-    const msg = ready >= SVC.n ? "Vos services sont prêts. Retrouvez-les tous juste en dessous." : f < -.1 && current < 0 && ready === 0 ? "Faites défiler : AYO génère vos services un par un." : "Génération en cours…";
+    const msg = ready >= SVC.n ? "Vos services sont prêts. Retrouvez-les tous juste en dessous." : f < -.1 && current < 0 && ready === 0 ? "Faites défiler : AYO génère vos services un par un." : ""; // pendant le défilement : pas de texte, seule la barre avance
     if (txt && txt.textContent !== msg) txt.textContent = msg;
     SVC.gen.classList.toggle("svc-done", ready >= SVC.n);
     SVC.gen.classList.toggle("svc-emitting", SVC.state.includes("fall"));

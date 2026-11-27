@@ -102,11 +102,12 @@ async function cloudAfterLogin(acc, isNew) {
         CLOUD.user = data && data.user && data.user.email === acc.email ? data.user : null;
     }
     if (!CLOUD.user) return; // compte uniquement sur l'appareil
-    CLOUD.ready = false;
-    const { data: row, error } = await CLOUD.sb.from("workspaces").select("id, slug, state").eq("owner", CLOUD.user.id).maybeSingle();
+    CLOUD.ready = false; CLOUD.adminRev = 0;
+    const { data: row, error } = await CLOUD.sb.from("workspaces").select("id, slug, state, admin_rev").eq("owner", CLOUD.user.id).maybeSingle();
     if (error) { showToast("Base de données injoignable : vos changements restent sur cet appareil.", "info"); return; }
     if (row) {
         CLOUD.wsId = row.id; CLOUD.slug = row.slug;
+        CLOUD.adminRev = Number(row.admin_rev) || 0;
         if (row.state && Object.keys(row.state).length && !isNew) {
             WS_KEYS.forEach(k => { if (k in row.state) appState[k] = row.state[k]; });
             try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...appState, isAdminAuthenticated: false })); } catch (e) {}
@@ -118,7 +119,7 @@ async function cloudAfterLogin(acc, isNew) {
     await cloudPush();
     await cloudSyncOrders(true);
     clearInterval(CLOUD.pollTimer);
-    CLOUD.pollTimer = setInterval(() => { if (appState.isAdminAuthenticated && !document.hidden) cloudSyncOrders(false); }, 30000);
+    CLOUD.pollTimer = setInterval(() => { if (appState.isAdminAuthenticated && !document.hidden) { cloudAdminCheck(); cloudSyncOrders(false); } }, 30000);
 }
 
 // ---- Sauvegarde : chaque changement part aussi dans la base (regroupé toutes les 1,5 s) ----
@@ -130,8 +131,29 @@ saveAppState = function () {
         CLOUD.saveTimer = setTimeout(cloudPush, 1500);
     }
 };
+// ---- Modifications faites par l'équipe AYO (page administrateur) à la demande de l'entreprise ----
+const ADMIN_FIELD_PATH = { name: ["tenant", "name"], city: ["tenant", "city"], specialty: ["tenant", "specialty"], ifu: ["billing", "ifu"], rccm: ["billing", "rccm"], address: ["billing", "address"], phone: ["company", "phone"], whatsapp: ["company", "whatsapp"], email: ["company", "email"] };
+async function cloudAdminCheck() {
+    if (!CLOUD.user || !CLOUD.wsId) return false;
+    const { data, error } = await CLOUD.sb.from("workspaces").select("admin_rev, admin_patch").eq("id", CLOUD.wsId).maybeSingle();
+    if (error || !data) return false;
+    const rev = Number(data.admin_rev) || 0;
+    if (rev <= (CLOUD.adminRev || 0)) return false;
+    const patch = data.admin_patch || {}, since = CLOUD.adminRev || 0;
+    Object.keys(patch).forEach(k => {
+        const path = ADMIN_FIELD_PATH[k], e = patch[k]; if (!path || !e || typeof e !== "object" || !(Number(e.rev) > since)) return;
+        if (!appState[path[0]] || typeof appState[path[0]] !== "object") appState[path[0]] = {};
+        appState[path[0]][path[1]] = String(e.v ?? "");
+    });
+    CLOUD.adminRev = rev;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...appState, isAdminAuthenticated: false })); } catch (e) {}
+    try { renderAll(); renderBackOfficeAll(); if (typeof currentBoTab !== "undefined" && currentBoTab) switchBoTab(currentBoTab); } catch (e) {}
+    showToast("L'équipe AYO a mis à jour vos informations à votre demande.", "success");
+    return true;
+}
 async function cloudPush() {
     if (!CLOUD.user || !CLOUD.ready) return;
+    await cloudAdminCheck();
     const base = { owner: CLOUD.user.id, name: appState.tenant?.name || "", state: pickWorkspace(appState), public_state: publicState() };
     let slug = CLOUD.slug || siteSlug();
     for (let attempt = 0; attempt < 3; attempt++) {

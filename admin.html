@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#231712">
+<title>AYO · Administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#fbf7f0;--bg2:#f1e7d6;--ink:#231712;--ink2:#3e2b22;--mute:#7a6658;--line:#e4d6c1;--car:#8c4a27;--brass:#d4a373;--sage:#2e6f40;--sageL:#e7f2ea;--red:#a3261b;--redL:#fbe9e6;--amb:#8a5a00;--ambL:#fdf1d8;--r:10px}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:"Playfair Display",Georgia,serif;margin:0;line-height:1.2}
+a{color:var(--car)}
+:focus-visible{outline:2px solid var(--car);outline-offset:2px}
+.hidden{display:none!important}
+.btn{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--line);background:#fff;border-radius:8px;padding:.5rem .9rem;cursor:pointer;font-weight:500;font-size:14px}
+.btn:hover{border-color:var(--ink2)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary:hover{background:var(--ink2)}
+.btn.danger{background:var(--red);color:#fff;border-color:var(--red)}
+.btn.ghost-danger{color:var(--red);border-color:#e9c2bc}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:13px;font-weight:500;color:var(--ink2)}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.55rem .7rem;font-size:14px;font-weight:400;color:var(--ink)}
+.field textarea{min-height:80px;resize:vertical}
+.field small{font-weight:400;color:var(--mute)}
+/* Connexion */
+#login{min-height:100vh;display:grid;place-items:center;padding:1.5rem;background:var(--ink)}
+#login .card{width:100%;max-width:380px;background:var(--bg);border-radius:14px;padding:2rem}
+#login h1{font-size:28px}
+#login p{color:var(--mute);margin:.4rem 0 1.4rem;font-size:14px}
+#login form{display:grid;gap:.9rem}
+.err{background:var(--redL);color:var(--red);border-radius:8px;padding:.6rem .8rem;font-size:13px}
+/* Coque */
+header.top{position:sticky;top:0;z-index:20;background:var(--ink);color:var(--bg);display:flex;align-items:center;gap:1.5rem;padding:.8rem 1.5rem}
+header.top .brand{font-family:"Playfair Display",serif;font-size:20px;font-weight:700}
+header.top .brand span{color:var(--brass);font-family:Inter;font-size:13px;font-weight:500;margin-left:.5rem}
+header.top nav{display:flex;gap:.25rem;flex:1}
+header.top nav button{background:none;border:0;color:#d8c8b4;padding:.45rem .8rem;border-radius:7px;cursor:pointer;font-weight:500;font-size:14px}
+header.top nav button[aria-current="page"]{background:rgba(255,255,255,.12);color:#fff}
+header.top .who{font-size:13px;color:#d8c8b4;display:flex;gap:.8rem;align-items:center}
+header.top .who button{background:none;border:1px solid #5a443a;color:#fff;border-radius:7px;padding:.35rem .7rem;cursor:pointer;font-size:13px}
+main{max-width:1240px;margin:0 auto;padding:1.6rem 1.5rem 4rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border:1px solid var(--line);border-radius:var(--r);background:#fff;margin-bottom:1.4rem;overflow:hidden}
+.stat{padding:.9rem 1.1rem;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--mute)}
+.stat.warn b{color:var(--amb)}
+.toolbar{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;margin-bottom:.9rem}
+.search{flex:1;min-width:240px;position:relative}
+.search input{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:.75rem 1rem .75rem 2.6rem;font-size:15px}
+.search svg{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--mute)}
+.toolbar select{border:1px solid var(--line);background:#fff;border-radius:10px;padding:.7rem .8rem}
+.count{font-size:13px;color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+.tablewrap{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:auto}
+th{text-align:left;font-size:12px;font-weight:600;color:var(--mute);padding:.65rem .9rem;border-bottom:1px solid var(--line);white-space:nowrap;background:#fdfaf5}
+td{padding:.7rem .9rem;border-bottom:1px solid #f0e6d7;vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr.row{cursor:pointer}
+tbody tr.row:hover td{background:#fdf8f0}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.co b{display:block;font-weight:600}
+.co small{color:var(--mute)}
+mark{background:#f6dfb8;color:inherit;border-radius:2px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:.15rem .55rem;border-radius:99px;white-space:nowrap;background:var(--bg2);color:var(--ink2)}
+.b-Actif{background:var(--sageL);color:var(--sage)}
+.b-relancer{background:var(--ambL);color:var(--amb)}
+.b-pause{background:#ececec;color:#555}
+.b-incomplete{background:var(--redL);color:var(--red)}
+.empty{padding:2.5rem 1rem;text-align:center;color:var(--mute)}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:.3rem}
+/* Fiche */
+#drawerBg{position:fixed;inset:0;background:rgba(35,23,18,.45);z-index:40}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(860px,100%);background:var(--bg);z-index:41;display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(35,23,18,.25);transform:translateX(0);transition:transform .22s ease}
+#drawer.off{transform:translateX(105%)}
+.dhead{padding:1.2rem 1.5rem;border-bottom:1px solid var(--line);display:flex;gap:1rem;align-items:flex-start;background:#fff}
+.dhead h2{font-size:24px}
+.dhead .meta{font-size:13px;color:var(--mute);margin-top:.25rem}
+.dhead .close{margin-left:auto;border:0;background:var(--bg2);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:20px;flex:none}
+.dactions{display:flex;flex-wrap:wrap;gap:.5rem;padding:.8rem 1.5rem;border-bottom:1px solid var(--line);background:#fff}
+.tabs{display:flex;gap:.2rem;padding:0 1.5rem;border-bottom:1px solid var(--line);overflow-x:auto;background:#fff}
+.tabs button{border:0;background:none;padding:.7rem .75rem;cursor:pointer;font-size:14px;color:var(--mute);border-bottom:2px solid transparent;white-space:nowrap;font-weight:500}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--car)}
+.tabs button i{font-style:normal;font-size:12px;background:var(--bg2);border-radius:99px;padding:0 .45rem;margin-left:.3rem}
+.dbody{flex:1;overflow:auto;padding:1.3rem 1.5rem 3rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem 1.2rem}
+dl.kv{display:grid;grid-template-columns:170px 1fr;gap:.5rem 1rem;margin:0;font-size:14px}
+dl.kv dt{color:var(--mute)}
+dl.kv dd{margin:0;word-break:break-word}
+.sect{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.1rem;margin-bottom:1rem}
+.sect h3{font-family:Inter;font-size:14px;font-weight:600;margin-bottom:.8rem}
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{padding:.6rem 0;border-bottom:1px solid #f0e6d7;font-size:14px}
+.timeline li:last-child{border:0}
+.timeline small{color:var(--mute)}
+.diff{font-size:13px;margin-top:.3rem;color:var(--ink2)}
+.diff s{color:var(--mute)}
+/* Fenêtres */
+.modalBg{position:fixed;inset:0;background:rgba(35,23,18,.55);z-index:60;display:grid;place-items:center;padding:1rem}
+.modal{background:var(--bg);border-radius:14px;width:100%;max-width:560px;max-height:92vh;overflow:auto;padding:1.4rem 1.5rem}
+.modal h2{font-size:22px;margin-bottom:.4rem}
+.modal p.lead{color:var(--mute);font-size:14px;margin:0 0 1rem}
+.modal .foot{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.2rem}
+.warnbox{background:var(--redL);color:var(--red);border-radius:8px;padding:.8rem .9rem;font-size:13.5px;margin-bottom:1rem}
+#toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.7rem 1.1rem;border-radius:10px;font-size:14px;z-index:80;max-width:90vw}
+#toast.bad{background:var(--red)}
+.loading{opacity:.5;pointer-events:none}
+@media (max-width:760px){
+  header.top{flex-wrap:wrap;gap:.6rem;padding:.7rem 1rem}
+  header.top nav{order:3;width:100%;overflow-x:auto}
+  main{padding:1rem}
+  .grid2{grid-template-columns:1fr}
+  dl.kv{grid-template-columns:1fr}
+  dl.kv dt{margin-top:.4rem}
+  .hide-sm{display:none}
+}
+@media (prefers-reduced-motion:reduce){#drawer{transition:none}}
+</style>
+</head>
+<body>
+
+<!-- Connexion -->
+<section id="login">
+  <div class="card">
+    <h1>Administration AYO</h1>
+    <p>Réservé à l'équipe AYO. Connectez-vous avec votre compte administrateur.</p>
+    <form id="loginForm">
+      <label class="field">E-mail<input type="email" id="lgEmail" autocomplete="username" required></label>
+      <label class="field">Mot de passe<input type="password" id="lgPass" autocomplete="current-password" required></label>
+      <div id="lgErr" class="err hidden" role="alert"></div>
+      <button class="btn primary" type="submit" id="lgBtn" style="justify-content:center;padding:.7rem">Se connecter</button>
+    </form>
+  </div>
+</section>
+
+<!-- Application -->
+<div id="app" class="hidden">
+  <header class="top">
+    <div class="brand">AYO<span>Administration</span></div>
+    <nav aria-label="Sections">
+      <button data-view="companies" aria-current="page">Entreprises</button>
+      <button data-view="journal">Journal des actions</button>
+      <button data-view="deleted">Comptes supprimés</button>
+    </nav>
+    <div class="who"><span id="whoEmail"></span><button id="logout">Se déconnecter</button></div>
+  </header>
+  <main>
+    <section id="v-companies">
+      <div class="stats" id="stats"></div>
+      <div class="toolbar">
+        <label class="search" for="q">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="q" type="search" placeholder="Rechercher une entreprise : nom, ville, e-mail, adresse du site…" autocomplete="off" aria-label="Rechercher une entreprise">
+        </label>
+        <select id="fStatus" aria-label="Filtrer par suivi">
+          <option value="">Tous les suivis</option>
+          <option>Nouveau</option><option>Actif</option><option>À relancer</option><option>En pause</option><option>Inscription incomplète</option>
+        </select>
+        <button class="btn" id="exportAll">Exporter la liste (CSV)</button>
+        <span class="count" id="count"></span>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Entreprise</th><th class="hide-sm">Compte</th><th>Suivi</th><th class="num hide-sm">Produits</th><th class="num">Commandes</th><th class="num hide-sm">Chiffre (FCFA)</th><th class="num hide-sm">Messages</th><th class="hide-sm">Dernière activité</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="v-journal" class="hidden">
+      <div class="toolbar"><h2 style="font-size:22px;flex:1">Journal des actions</h2><button class="btn" id="exportJournal">Exporter (CSV)</button></div>
+      <p class="count" style="margin:-.4rem 0 1rem">Chaque modification, suppression, export et changement de suivi fait depuis cette page est enregistré ici.</p>
+      <div class="tablewrap"><table><thead><tr><th>Date</th><th>Action</th><th>Entreprise</th><th>Demande / motif</th><th class="hide-sm">Par</th></tr></thead><tbody id="journalRows"></tbody></table></div>
+    </section>
+
+    <section id="v-deleted" class="hidden">
+      <div class="toolbar"><h2 style="font-size:22px;flex:1">Comptes supprimés</h2></div>
+      <p class="count" style="margin:-.4rem 0 1rem">Une copie des données est archivée au moment de la suppression. Vous pouvez la télécharger si l'entreprise la demande.</p>
+      <div class="tablewrap"><table><thead><tr><th>Supprimé le</th><th>Entreprise</th><th>E-mail</th><th>Motif</th><th class="hide-sm">Par</th><th></th></tr></thead><tbody id="deletedRows"></tbody></table></div>
+    </section>
+  </main>
+</div>
+
+<!-- Fiche entreprise -->
+<div id="drawerBg" class="hidden"></div>
+<aside id="drawer" class="off hidden" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+  <div class="dhead">
+    <div><h2 id="dTitle">Entreprise</h2><div class="meta" id="dMeta"></div></div>
+    <button class="close" id="dClose" aria-label="Fermer la fiche">×</button>
+  </div>
+  <div class="dactions">
+    <button class="btn primary" id="aEdit">Modifier à la demande</button>
+    <button class="btn" id="aJson">Télécharger toutes les données (JSON)</button>
+    <button class="btn" id="aCsv">Commandes (CSV)</button>
+    <button class="btn ghost-danger" id="aDelete" style="margin-left:auto">Supprimer le compte</button>
+  </div>
+  <div class="tabs" role="tablist" id="dTabs"></div>
+  <div class="dbody" id="dBody"></div>
+</aside>
+
+<!-- Modifier -->
+<div class="modalBg hidden" id="mEdit" role="dialog" aria-modal="true" aria-labelledby="mEditT">
+  <form class="modal" id="editForm">
+    <h2 id="mEditT">Modifier les informations</h2>
+    <p class="lead">Ne changez que ce que l'entreprise vous a demandé. Ses données sont mises à jour dans la base et dans son espace AYO.</p>
+    <div class="grid2">
+      <label class="field">Nom de l'entreprise<input name="name" maxlength="200" required></label>
+      <label class="field">Ville<input name="city" maxlength="200"></label>
+      <label class="field">Activité<input name="specialty" maxlength="200"></label>
+      <label class="field">Adresse<input name="address" maxlength="200"></label>
+      <label class="field">IFU<input name="ifu" inputmode="numeric" pattern="\d{13}" maxlength="13"><small>13 chiffres</small></label>
+      <label class="field">RCCM<input name="rccm" maxlength="200"></label>
+      <label class="field">Téléphone<input name="phone" maxlength="200"></label>
+      <label class="field">WhatsApp<input name="whatsapp" maxlength="200"></label>
+      <label class="field" style="grid-column:1/-1">E-mail de contact<input name="email" type="email" maxlength="200"></label>
+      <label class="field" style="grid-column:1/-1">Demande de l'entreprise<textarea name="reason" required minlength="5" maxlength="1000" placeholder="Ex. : appel du 27/11, le gérant demande de changer le numéro WhatsApp."></textarea><small>Obligatoire. Elle est enregistrée dans le journal.</small></label>
+    </div>
+    <div id="editErr" class="err hidden" role="alert" style="margin-top:1rem"></div>
+    <div class="foot"><button type="button" class="btn" data-close>Annuler</button><button class="btn primary" type="submit">Enregistrer les modifications</button></div>
+  </form>
+</div>
+
+<!-- Supprimer -->
+<div class="modalBg hidden" id="mDel" role="dialog" aria-modal="true" aria-labelledby="mDelT">
+  <form class="modal" id="delForm">
+    <h2 id="mDelT">Supprimer le compte</h2>
+    <div class="warnbox">Le compte, son site, ses produits, commandes, réservations, messages, avis et clients seront supprimés. Une copie est archivée dans « Comptes supprimés ». Cette action ne peut pas être annulée.</div>
+    <label class="field">Demande de l'entreprise<textarea name="reason" required minlength="5" maxlength="1000" placeholder="Ex. : e-mail du gérant reçu le 27/11 demandant la fermeture du compte."></textarea></label>
+    <label class="field" style="margin-top:.9rem">Pour confirmer, tapez <b id="delWord"></b><input name="confirm" autocomplete="off" required></label>
+    <div id="delErr" class="err hidden" role="alert" style="margin-top:1rem"></div>
+    <div class="foot"><button type="button" class="btn" data-close>Annuler</button><button class="btn danger" type="submit" id="delBtn" disabled>Supprimer définitivement</button></div>
+  </form>
+</div>
+
+<div id="toast" class="hidden" role="status"></div>
+
+<script>
+(() => {
+  const SB_URL = "https://oufykmvoiurrpbyeqdbz.supabase.co";
+  const SB_KEY = "sb_publishable_DxS97NMYL1WwPKYqlquSLg_J2l6_MZ3";
+  const $ = s => document.querySelector(s);
+  const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmtN = n => Number(n || 0).toLocaleString("fr-FR");
+  const fmtD = d => d ? new Date(d).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+  const fmtDay = d => d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+  const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  let toastT;
+  function toast(msg, bad) { const t = $("#toast"); t.textContent = msg; t.className = bad ? "bad" : ""; clearTimeout(toastT); toastT = setTimeout(() => t.className = "hidden", 4200); }
+  function errText(e) { const m = e && (e.message || e.error_description); if (!m) return "Une erreur est survenue."; return /failed to fetch|network/i.test(m) ? "Connexion impossible. Vérifiez internet puis réessayez." : m.charAt(0).toUpperCase() + m.slice(1); }
+
+  if (!window.supabase) { document.body.innerHTML = '<p style="padding:2rem">Impossible de charger le service de connexion. Vérifiez la connexion internet puis rechargez la page.</p>'; return; }
+  const sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, storageKey: "ayo-admin-auth", autoRefreshToken: true } });
+  const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw error; return data; };
+
+  const S = { list: [], filtered: [], current: null, tab: "identity", searchSeq: 0 };
+
+  // ---------- Connexion ----------
+  async function enter(user) {
+    let ok = false;
+    try { ok = await rpc("is_platform_admin"); } catch (e) { ok = false; }
+    if (!ok) {
+      await sb.auth.signOut();
+      showLoginErr("Ce compte n'a pas les droits d'administration. Demandez à l'équipe AYO de vous les donner.");
+      return;
+    }
+    $("#whoEmail").textContent = user.email;
+    $("#login").classList.add("hidden"); $("#app").classList.remove("hidden");
+    loadOverview(); runSearch("");
+  }
+  function showLoginErr(m) { const e = $("#lgErr"); e.textContent = m; e.classList.remove("hidden"); }
+  $("#loginForm").addEventListener("submit", async ev => {
+    ev.preventDefault(); $("#lgErr").classList.add("hidden");
+    const b = $("#lgBtn"); b.disabled = true; b.textContent = "Connexion…";
+    const { data, error } = await sb.auth.signInWithPassword({ email: $("#lgEmail").value.trim(), password: $("#lgPass").value });
+    b.disabled = false; b.textContent = "Se connecter";
+    if (error) { showLoginErr(/invalid/i.test(error.message) ? "E-mail ou mot de passe incorrect." : error.message); return; }
+    enter(data.user);
+  });
+  $("#logout").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
+  sb.auth.getSession().then(({ data }) => { if (data.session) enter(data.session.user); });
+
+  // ---------- Navigation ----------
+  document.querySelectorAll("header.top nav button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("header.top nav button").forEach(x => x.removeAttribute("aria-current"));
+    b.setAttribute("aria-current", "page");
+    ["companies", "journal", "deleted"].forEach(v => $("#v-" + v).classList.toggle("hidden", v !== b.dataset.view));
+    if (b.dataset.view === "journal") loadJournal();
+    if (b.dataset.view === "deleted") loadDeleted();
+    if (b.dataset.view === "companies") { loadOverview(); runSearch($("#q").value); }
+  }));
+
+  // ---------- Vue d'ensemble ----------
+  async function loadOverview() {
+    try {
+      const o = await rpc("admin_overview");
+      const items = [["Comptes inscrits", o.accounts], ["Entreprises avec un espace", o.companies], ["Inscriptions incomplètes", o.incomplete, o.incomplete > 0], ["Actives sur 7 jours", o.active7], ["Commandes", o.orders], ["Chiffre total (FCFA)", o.revenue], ["Réservations", o.bookings], ["Messages non lus", o.messages_new, o.messages_new > 0], ["À relancer", o.to_follow, o.to_follow > 0], ["Comptes supprimés", o.deleted]];
+      $("#stats").innerHTML = items.map(([l, v, w]) => `<div class="stat${w ? " warn" : ""}"><b>${fmtN(v)}</b><span>${esc(l)}</span></div>`).join("");
+    } catch (e) { $("#stats").innerHTML = `<div class="stat"><span>${esc(errText(e))}</span></div>`; }
+  }
+
+  // ---------- Recherche dynamique ----------
+  let deb;
+  $("#q").addEventListener("input", e => { renderRows(); clearTimeout(deb); deb = setTimeout(() => runSearch(e.target.value), 250); });
+  $("#fStatus").addEventListener("change", renderRows);
+  async function runSearch(q) {
+    const seq = ++S.searchSeq;
+    try {
+      const data = await rpc("admin_list", { p_search: q.trim() });
+      if (seq !== S.searchSeq) return;
+      S.list = data || []; renderRows();
+    } catch (e) { $("#rows").innerHTML = `<tr><td colspan="8" class="empty"><b>Liste indisponible</b>${esc(errText(e))}</td></tr>`; }
+  }
+  function hl(text, q) {
+    const t = String(text || ""); if (!q) return esc(t);
+    const i = norm(t).indexOf(norm(q)); if (i < 0) return esc(t);
+    return esc(t.slice(0, i)) + "<mark>" + esc(t.slice(i, i + q.length)) + "</mark>" + esc(t.slice(i + q.length));
+  }
+  const badgeCls = s => s === "Actif" ? "b-Actif" : s === "À relancer" ? "b-relancer" : s === "En pause" ? "b-pause" : s === "Inscription incomplète" ? "b-incomplete" : "";
+  function renderRows() {
+    const q = $("#q").value.trim(), nq = norm(q), st = $("#fStatus").value;
+    S.filtered = S.list.filter(r => (!st || r.status === st) && (!nq || [r.company, r.email, r.city, r.specialty, r.slug].some(v => norm(v).includes(nq))));
+    $("#count").textContent = `${S.filtered.length} entreprise${S.filtered.length > 1 ? "s" : ""}`;
+    if (!S.filtered.length) {
+      $("#rows").innerHTML = `<tr><td colspan="8" class="empty"><b>${q || st ? "Aucune entreprise ne correspond" : "Aucune entreprise inscrite pour l'instant"}</b>${q || st ? "Essayez un autre nom, une ville ou un e-mail." : "Les entreprises apparaîtront ici dès leur inscription sur AYO."}</td></tr>`;
+      return;
+    }
+    $("#rows").innerHTML = S.filtered.map((r, i) => `<tr class="row" tabindex="0" data-i="${i}">
+      <td class="co"><b>${hl(r.company || "(espace pas encore créé)", q)}</b><small>${hl([r.specialty, r.city].filter(Boolean).join(" · ") || "—", q)}</small></td>
+      <td class="hide-sm">${hl(r.email, q)}${r.email_confirmed ? "" : ' <span class="badge b-relancer">e-mail non confirmé</span>'}<br><small style="color:var(--mute)">Inscrit le ${fmtDay(r.signed_up)}</small></td>
+      <td><span class="badge ${badgeCls(r.status)}">${esc(r.status)}</span></td>
+      <td class="num hide-sm">${fmtN(r.products)}</td><td class="num">${fmtN(r.orders)}</td><td class="num hide-sm">${fmtN(r.revenue)}</td>
+      <td class="num hide-sm">${r.messages_new ? `<span class="badge b-relancer">${fmtN(r.messages_new)} non lu${r.messages_new > 1 ? "s" : ""}</span>` : "0"}</td>
+      <td class="hide-sm">${fmtD(r.updated_at || r.last_sign_in)}</td></tr>`).join("");
+  }
+  $("#rows").addEventListener("click", e => { const tr = e.target.closest("tr.row"); if (tr) openCompany(S.filtered[+tr.dataset.i]); });
+  $("#rows").addEventListener("keydown", e => { if (e.key === "Enter") { const tr = e.target.closest("tr.row"); if (tr) openCompany(S.filtered[+tr.dataset.i]); } });
+
+  // ---------- Exports ----------
+  function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+  function csv(rows, cols) {
+    const cell = v => { let s = v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+    return "﻿" + cols.map(c => cell(c[1])).join(";") + "\n" + rows.map(r => cols.map(c => cell(typeof c[0] === "function" ? c[0](r) : r[c[0]])).join(";")).join("\n");
+  }
+  const slugName = s => norm(s || "entreprise").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "entreprise";
+  $("#exportAll").addEventListener("click", () => {
+    download(`ayo-entreprises-${new Date().toISOString().slice(0, 10)}.csv`, csv(S.filtered, [["company", "Entreprise"], ["email", "E-mail du compte"], ["city", "Ville"], ["specialty", "Activité"], ["slug", "Adresse du site"], ["status", "Suivi"], ["note", "Note de suivi"], ["products", "Produits"], ["orders", "Commandes"], ["revenue", "Chiffre FCFA"], ["bookings", "Réservations"], ["messages_new", "Messages non lus"], ["customers", "Clients"], [r => fmtD(r.signed_up), "Inscrit le"], [r => fmtD(r.updated_at), "Dernière activité"]]), "text/csv;charset=utf-8");
+  });
+
+  // ---------- Fiche entreprise ----------
+  const TABS = [["identity", "Identité"], ["follow", "Suivi"], ["products", "Produits"], ["orders", "Commandes"], ["bookings", "Réservations"], ["messages", "Messages"], ["reviews", "Avis"], ["customers", "Clients"], ["invoices", "Factures"], ["links", "Liens"], ["history", "Historique"]];
+  let lastFocus;
+  async function openCompany(r) {
+    if (!r) return;
+    lastFocus = document.activeElement;
+    $("#drawerBg").classList.remove("hidden"); const d = $("#drawer"); d.classList.remove("hidden"); requestAnimationFrame(() => d.classList.remove("off"));
+    $("#dTitle").textContent = r.company || r.email; $("#dMeta").textContent = "Chargement…"; $("#dBody").innerHTML = ""; $("#dTabs").innerHTML = "";
+    try {
+      S.current = await rpc("admin_get", { p_user: r.user_id }); S.current._row = r;
+      S.tab = "identity"; renderDrawer(); $("#dClose").focus();
+    } catch (e) { $("#dMeta").textContent = errText(e); }
+  }
+  function closeDrawer() { const d = $("#drawer"); d.classList.add("off"); $("#drawerBg").classList.add("hidden"); setTimeout(() => d.classList.add("hidden"), 230); S.current = null; if (lastFocus) lastFocus.focus(); }
+  $("#dClose").addEventListener("click", closeDrawer); $("#drawerBg").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", e => { if (e.key !== "Escape") return; const m = document.querySelector(".modalBg:not(.hidden)"); if (m) m.classList.add("hidden"); else if (S.current) closeDrawer(); });
+
+  const st = () => (S.current.workspace && S.current.workspace.state) || {};
+  function counts() {
+    const s = st(), c = S.current;
+    return { products: (s.customProducts || []).length, orders: Math.max((c.orders || []).length, (s.orders || []).length), bookings: (c.bookings || []).length, messages: (c.messages || []).length, reviews: Math.max((c.reviews || []).length, (s.reviews || []).length), customers: (c.customers || []).length, invoices: (s.invoices || []).length, links: ((s.company || {}).links || []).length, history: (c.actions || []).length };
+  }
+  function renderDrawer() {
+    const c = S.current, w = c.workspace, s = st(), n = counts();
+    $("#dTitle").textContent = (s.tenant && s.tenant.name) || (w && w.name) || c.account.email;
+    $("#dMeta").textContent = [c.account.email, w ? `site : ${w.slug}` : "espace pas encore créé", `inscrit le ${fmtDay(c.account.signed_up)}`].join(" · ");
+    $("#aEdit").disabled = !w;
+    $("#aCsv").disabled = !n.orders;
+    $("#dTabs").innerHTML = TABS.map(([k, l]) => `<button role="tab" aria-selected="${S.tab === k}" data-t="${k}">${l}${n[k] ? `<i>${n[k]}</i>` : ""}</button>`).join("");
+    $("#dBody").innerHTML = VIEWS[S.tab]();
+    if (S.tab === "follow") bindFollow();
+  }
+  $("#dTabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b) { S.tab = b.dataset.t; renderDrawer(); } });
+
+  const kv = pairs => `<dl class="kv">${pairs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v === "" || v == null ? '<span style="color:var(--mute)">—</span>' : esc(v)}</dd>`).join("")}</dl>`;
+  const table = (rows, cols, empty) => rows && rows.length
+    ? `<div class="tablewrap"><table><thead><tr>${cols.map(c => `<th class="${c[2] || ""}">${esc(c[1])}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${cols.map(c => `<td class="${c[2] || ""}">${esc(typeof c[0] === "function" ? c[0](r) : r[c[0]])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`
+    : `<div class="empty"><b>${esc(empty)}</b></div>`;
+  const pay = (r, k) => (r.payload && r.payload[k]) ?? r[k];
+  const FORMATS = { 1: "Format 1", 2: "Format 2", 3: "Format 3", 4: "Format 4", 5: "Luxe en chapitres" };
+
+  const VIEWS = {
+    identity() {
+      const c = S.current, s = st(), t = s.tenant || {}, b = s.billing || {}, co = s.company || {};
+      return `<div class="sect"><h3>Entreprise</h3>${kv([["Nom", t.name], ["Activité", t.specialty], ["Ville", t.city], ["Adresse", b.address], ["Format du site", FORMATS[s.activeFormat] || s.activeFormat], ["Adresse du site", c.workspace && c.workspace.slug]])}</div>
+        <div class="sect"><h3>Identité légale</h3>${kv([["IFU", b.ifu], ["RCCM", b.rccm], ["Régime", b.regime]])}</div>
+        <div class="sect"><h3>Contacts</h3>${kv([["Téléphone", co.phone], ["WhatsApp", co.whatsapp], ["E-mail de contact", co.email]])}</div>
+        <div class="sect"><h3>Compte</h3>${kv([["E-mail de connexion", c.account.email], ["E-mail confirmé", c.account.email_confirmed ? "Oui" : "Non"], ["Inscrit le", fmtD(c.account.signed_up)], ["Dernière connexion", fmtD(c.account.last_sign_in)], ["Espace créé le", c.workspace ? fmtD(c.workspace.created_at) : ""], ["Dernière sauvegarde", c.workspace ? fmtD(c.workspace.updated_at) : ""]])}</div>`;
+    },
+    follow() {
+      const f = S.current.followup || {};
+      const cur = f.status || "Nouveau";
+      return `<form class="sect" id="followForm"><h3>Suivi de gestion</h3>
+        <label class="field">Statut<select name="status">${["Nouveau", "Actif", "À relancer", "En pause"].map(o => `<option${o === cur ? " selected" : ""}>${o}</option>`).join("")}</select></label>
+        <label class="field" style="margin-top:.9rem">Note interne<textarea name="note" maxlength="4000" placeholder="Ex. : relancer pour compléter le catalogue avant le 5 décembre.">${esc(f.note || "")}</textarea><small>${f.updated_at ? "Dernière mise à jour : " + fmtD(f.updated_at) : "Visible seulement par l'équipe AYO."}</small></label>
+        <div style="margin-top:.9rem"><button class="btn primary" type="submit"${S.current.workspace ? "" : " disabled"}>Enregistrer le suivi</button>${S.current.workspace ? "" : ' <small style="color:var(--mute)">Disponible quand l\'entreprise aura créé son espace.</small>'}</div></form>`;
+    },
+    products() {
+      return table(st().customProducts || [], [["name", "Produit"], ["category", "Catégorie"], [r => fmtN(r.price), "Prix (FCFA)", "num"], ["leadTime", "Délai"], ["desc", "Description"]], "Aucun produit dans le catalogue");
+    },
+    orders() {
+      const cloud = S.current.orders || [];
+      if (cloud.length) return table(cloud, [[r => fmtD(r.created_at), "Date"], [r => r.ref || pay(r, "ref"), "Référence"], [r => pay(r, "client"), "Client"], [r => pay(r, "details"), "Détail"], [r => pay(r, "payment"), "Paiement"], [r => fmtN(pay(r, "amountFcfa")), "Montant", "num"], [r => r.status || pay(r, "status"), "Statut"]], "");
+      return table(st().orders || [], [["ref", "Référence"], ["client", "Client"], ["details", "Détail"], ["payment", "Paiement"], [r => fmtN(r.amountFcfa), "Montant", "num"], ["status", "Statut"]], "Aucune commande");
+    },
+    bookings() { return table(S.current.bookings, [[r => fmtD(r.created_at), "Reçue le"], ["ref", "Référence"], ["name", "Client"], ["phone", "Téléphone"], ["day", "Jour"], ["slot", "Créneau"], ["guests", "Pers.", "num"], ["event_type", "Type"], ["status", "Statut"]], "Aucune réservation"); },
+    messages() { return table(S.current.messages, [[r => fmtD(r.created_at), "Reçu le"], ["name", "Nom"], ["email", "Contact"], ["topic", "Sujet"], ["body", "Message"], ["status", "Statut"]], "Aucun message"); },
+    reviews() {
+      const rv = (S.current.reviews || []).length ? S.current.reviews : (st().reviews || []);
+      return table(rv, [[r => fmtD(r.created_at || r.date), "Date"], [r => r.author || r.name, "Auteur"], [r => r.stars ? "★".repeat(r.stars) : "", "Note"], ["item", "Produit"], [r => r.comment || r.text, "Commentaire"], ["status", "Statut"]], "Aucun avis");
+    },
+    customers() { return table(S.current.customers, [["name", "Nom"], ["contact", "Contact"], ["orders_count", "Commandes", "num"], ["bookings_count", "Réservations", "num"], ["messages_count", "Messages", "num"], [r => fmtD(r.last_seen_at), "Dernière visite"]], "Aucun client enregistré"); },
+    invoices() { return table(st().invoices || [], [["id", "Numéro"], [r => fmtD(r.date), "Date"], ["client", "Client"], ["orderRef", "Commande"], [r => fmtN(r.ttc ?? r.totalTTC ?? r.total), "Total TTC", "num"], ["payment", "Paiement"]], "Aucune facture émise"); },
+    links() { return table((st().company || {}).links || [], [["type", "Réseau"], ["url", "Adresse"], [r => r.show === false ? "Masqué" : "Affiché", "Sur le site"]], "Aucun lien ajouté"); },
+    history() {
+      const a = S.current.actions || [];
+      if (!a.length) return `<div class="empty"><b>Aucune action de l'équipe AYO sur ce compte</b></div>`;
+      return `<div class="sect"><ul class="timeline">${a.map(x => `<li><b>${esc(ACTION[x.action] || x.action)}</b> · <small>${fmtD(x.created_at)} par ${esc(x.admin_email || "—")}</small>${x.reason ? `<div>${esc(x.reason)}</div>` : ""}${diffHtml(x)}</li>`).join("")}</ul></div>`;
+    }
+  };
+  const ACTION = { modification: "Informations modifiées", suppression: "Compte supprimé", suivi: "Suivi mis à jour", export: "Données exportées" };
+  const LABEL = { name: "Nom", city: "Ville", specialty: "Activité", ifu: "IFU", rccm: "RCCM", address: "Adresse", phone: "Téléphone", whatsapp: "WhatsApp", email: "E-mail" };
+  function diffHtml(x) {
+    if (x.action !== "modification" || !x.details) return x.details && x.details.status ? `<div class="diff">${esc(x.details.status)}</div>` : "";
+    return Object.entries(x.details).map(([k, v]) => `<div class="diff">${esc(LABEL[k] || k)} : <s>${esc(v.avant || "vide")}</s> → ${esc(v["après"] || "vide")}</div>`).join("");
+  }
+  function bindFollow() {
+    $("#followForm").addEventListener("submit", async e => {
+      e.preventDefault(); const f = new FormData(e.target);
+      try {
+        await rpc("admin_set_followup", { p_user: S.current.account.user_id, p_status: f.get("status"), p_note: f.get("note") });
+        toast("Suivi enregistré."); await refreshCurrent(); runSearch($("#q").value); loadOverview();
+      } catch (err) { toast(errText(err), true); }
+    });
+  }
+  async function refreshCurrent() { const row = S.current._row; S.current = await rpc("admin_get", { p_user: row.user_id }); S.current._row = row; renderDrawer(); }
+
+  $("#aJson").addEventListener("click", async () => {
+    const c = S.current; if (!c) return;
+    const copy = { ...c }; delete copy._row;
+    download(`ayo-${slugName(c._row.company || c.account.email)}-donnees.json`, JSON.stringify({ exporte_le: new Date().toISOString(), ...copy }, null, 2), "application/json");
+    try { await rpc("admin_log_export", { p_user: c.account.user_id, p_what: "Toutes les données (JSON)" }); } catch (e) {}
+  });
+  $("#aCsv").addEventListener("click", async () => {
+    const c = S.current; if (!c) return;
+    const cloud = c.orders || [];
+    const rows = cloud.length ? cloud.map(r => ({ date: fmtD(r.created_at), ref: r.ref || pay(r, "ref"), client: pay(r, "client"), details: pay(r, "details"), payment: pay(r, "payment"), amount: pay(r, "amountFcfa"), status: r.status || pay(r, "status") }))
+      : (st().orders || []).map(r => ({ date: "", ref: r.ref, client: r.client, details: r.details, payment: r.payment, amount: r.amountFcfa, status: r.status }));
+    download(`ayo-${slugName(c._row.company)}-commandes.csv`, csv(rows, [["date", "Date"], ["ref", "Référence"], ["client", "Client"], ["details", "Détail"], ["payment", "Paiement"], ["amount", "Montant FCFA"], ["status", "Statut"]]), "text/csv;charset=utf-8");
+    try { await rpc("admin_log_export", { p_user: c.account.user_id, p_what: "Commandes (CSV)" }); } catch (e) {}
+  });
+
+  // ---------- Modifier ----------
+  const FIELDS = ["name", "city", "specialty", "address", "ifu", "rccm", "phone", "whatsapp", "email"];
+  const current = () => { const s = st(), t = s.tenant || {}, b = s.billing || {}, co = s.company || {}; return { name: t.name, city: t.city, specialty: t.specialty, address: b.address, ifu: b.ifu, rccm: b.rccm, phone: co.phone, whatsapp: co.whatsapp, email: co.email }; };
+  document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => b.closest(".modalBg").classList.add("hidden")));
+  $("#aEdit").addEventListener("click", () => {
+    const f = $("#editForm"), cur = current();
+    FIELDS.forEach(k => f.elements[k].value = cur[k] || ""); f.elements.reason.value = "";
+    $("#editErr").classList.add("hidden"); $("#mEdit").classList.remove("hidden"); f.elements.name.focus();
+  });
+  $("#editForm").addEventListener("submit", async e => {
+    e.preventDefault(); const f = e.target, cur = current(), patch = {};
+    FIELDS.forEach(k => { const v = f.elements[k].value.trim(); if (v !== String(cur[k] || "")) patch[k] = v; });
+    if (!Object.keys(patch).length) { showErr("#editErr", "Aucune information n'a changé."); return; }
+    f.classList.add("loading");
+    try {
+      const r = await rpc("admin_update", { p_user: S.current.account.user_id, p_patch: patch, p_reason: f.elements.reason.value.trim() });
+      $("#mEdit").classList.add("hidden");
+      toast(r && r.changed ? `Modifications enregistrées (${Object.keys(r.fields).length} champ${Object.keys(r.fields).length > 1 ? "s" : ""}).` : "Aucune information n'a changé.");
+      await refreshCurrent(); runSearch($("#q").value);
+    } catch (err) { showErr("#editErr", errText(err)); }
+    f.classList.remove("loading");
+  });
+  function showErr(sel, m) { const el = $(sel); el.textContent = m; el.classList.remove("hidden"); }
+
+  // ---------- Supprimer ----------
+  let delWord = "";
+  $("#aDelete").addEventListener("click", () => {
+    const c = S.current; delWord = (st().tenant && st().tenant.name) || (c.workspace && c.workspace.name) || c.account.email;
+    $("#delWord").textContent = delWord; const f = $("#delForm"); f.reset(); $("#delBtn").disabled = true;
+    $("#delErr").classList.add("hidden"); $("#mDel").classList.remove("hidden"); f.elements.reason.focus();
+  });
+  $("#delForm").addEventListener("input", e => { const f = e.currentTarget; $("#delBtn").disabled = !(f.elements.confirm.value.trim() === delWord && f.elements.reason.value.trim().length >= 5); });
+  $("#delForm").addEventListener("submit", async e => {
+    e.preventDefault(); const f = e.target; f.classList.add("loading");
+    try {
+      await rpc("admin_delete_account", { p_user: S.current.account.user_id, p_reason: f.elements.reason.value.trim(), p_confirm: f.elements.confirm.value.trim() });
+      $("#mDel").classList.add("hidden"); closeDrawer(); toast("Compte supprimé. Une copie est disponible dans « Comptes supprimés ».");
+      runSearch($("#q").value); loadOverview();
+    } catch (err) { showErr("#delErr", errText(err)); }
+    f.classList.remove("loading");
+  });
+
+  // ---------- Journal ----------
+  let journal = [];
+  async function loadJournal() {
+    try {
+      journal = await rpc("admin_journal", { p_limit: 500 }) || [];
+      $("#journalRows").innerHTML = journal.length ? journal.map(x => `<tr><td>${fmtD(x.created_at)}</td><td><span class="badge">${esc(ACTION[x.action] || x.action)}</span></td><td>${esc(x.company || "—")}</td><td>${esc(x.reason || "")}${diffHtml(x)}</td><td class="hide-sm">${esc(x.admin_email || "")}</td></tr>`).join("")
+        : `<tr><td colspan="5" class="empty"><b>Aucune action pour l'instant</b>Les modifications et suppressions faites ici apparaîtront dans ce journal.</td></tr>`;
+    } catch (e) { $("#journalRows").innerHTML = `<tr><td colspan="5" class="empty">${esc(errText(e))}</td></tr>`; }
+  }
+  $("#exportJournal").addEventListener("click", () => download(`ayo-journal-${new Date().toISOString().slice(0, 10)}.csv`, csv(journal, [[r => fmtD(r.created_at), "Date"], [r => ACTION[r.action] || r.action, "Action"], ["company", "Entreprise"], ["reason", "Demande / motif"], ["details", "Détails"], ["admin_email", "Par"]]), "text/csv;charset=utf-8"));
+
+  // ---------- Comptes supprimés ----------
+  let deleted = [];
+  async function loadDeleted() {
+    try {
+      deleted = await rpc("admin_deleted_list") || [];
+      $("#deletedRows").innerHTML = deleted.length ? deleted.map((x, i) => `<tr><td>${fmtD(x.deleted_at)}</td><td>${esc(x.company || "—")}</td><td>${esc(x.email)}</td><td>${esc(x.reason)}</td><td class="hide-sm">${esc(x.deleted_by_email)}</td><td><button class="btn" data-dl="${i}">Télécharger l'archive</button></td></tr>`).join("")
+        : `<tr><td colspan="6" class="empty"><b>Aucun compte supprimé</b></td></tr>`;
+    } catch (e) { $("#deletedRows").innerHTML = `<tr><td colspan="6" class="empty">${esc(errText(e))}</td></tr>`; }
+  }
+  $("#deletedRows").addEventListener("click", async e => {
+    const b = e.target.closest("[data-dl]"); if (!b) return; const x = deleted[+b.dataset.dl];
+    try { const data = await rpc("admin_deleted_get", { p_id: x.id }); download(`ayo-archive-${slugName(x.company || x.email)}.json`, JSON.stringify(data, null, 2), "application/json"); }
+    catch (err) { toast(errText(err), true); }
+  });
+})();
+</script>
+</body>
+</html>

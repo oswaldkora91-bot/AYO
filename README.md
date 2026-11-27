@@ -10,6 +10,7 @@ Le projet est un site statique : du HTML, du CSS et du JavaScript, sans étape d
 |---|---|---|
 | `index.html` | Les commerçants | Accueil d'AYO, inscription, connexion et back-office de l'entreprise |
 | `boutique.html` | Les clients du commerce | La boutique en ligne, dans l'un des 5 formats |
+| `admin.html` | L'équipe AYO | Administration : liste des entreprises inscrites, recherche, suivi, modification et suppression de compte à la demande |
 
 L'adresse d'une boutique est `boutique.html#nom-de-la-boutique`.
 
@@ -32,6 +33,29 @@ Prenez-les dans Supabase › *Project Settings* › *API* (« Project URL » et 
 
 Pour un nouveau projet Supabase, collez `supabase/schema.sql` dans *SQL Editor* puis cliquez sur *Run*.
 Dans *Authentication* › *URL Configuration*, mettez l'adresse du site en ligne dans « Site URL ».
+
+## Page administrateur (`admin.html`)
+
+Réservée à l'équipe AYO, elle n'est pas indexée par les moteurs de recherche.
+
+1. Collez `supabase/admin.sql` dans *SQL Editor* (après `schema.sql`) puis *Run*.
+2. Créez votre compte sur le site comme une entreprise, puis donnez-lui le rôle d'administrateur dans *SQL Editor* :
+   ```sql
+   select public.make_platform_admin('votre@email.com');
+   ```
+3. Ouvrez `admin.html` et connectez-vous avec ce compte. Un compte qui n'est pas administrateur est refusé.
+
+Ce que l'on y fait :
+
+- **Rechercher** une entreprise par nom, ville, activité, e-mail ou adresse du site (les résultats se mettent à jour pendant la frappe).
+- **Consulter** toutes ses données : identité, IFU/RCCM, contacts, produits, commandes, réservations, messages, avis, clients, factures, liens.
+- **Exporter** la liste (CSV) ou les données d'une entreprise (JSON, commandes en CSV).
+- **Suivre** chaque entreprise : statut (Nouveau, Actif, À relancer, En pause) et note interne.
+- **Modifier** nom, ville, activité, adresse, IFU, RCCM, téléphone, WhatsApp, e-mail à la demande de l'entreprise. La demande est obligatoire ; l'espace de l'entreprise reçoit la modification automatiquement.
+- **Supprimer** un compte à la demande : il faut recopier le nom de l'entreprise. Une copie des données est archivée dans « Comptes supprimés ».
+
+Chaque action est écrite dans le **journal des actions** (date, administrateur, demande, valeurs avant/après).
+Les données d'administration ne sont accessibles que par des fonctions qui vérifient le rôle : la clé publique seule ne donne accès à rien.
 
 ## Mettre en ligne
 

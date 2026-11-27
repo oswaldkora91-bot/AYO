@@ -193,7 +193,7 @@ cloudAfterLogin = async function (acc, isNew) {
     if (!CLOUD.user || !CLOUD.wsId) return;
     await cloudSyncInbox(true);
     clearInterval(CLOUD.pollTimer);
-    CLOUD.pollTimer = setInterval(() => { if (appState.isAdminAuthenticated && !document.hidden) cloudSyncInbox(false); }, 30000);
+    CLOUD.pollTimer = setInterval(() => { if (appState.isAdminAuthenticated && !document.hidden) { cloudAdminCheck(); cloudSyncInbox(false); } }, 30000);
 };
 
 // ---------- Navigation entre les deux pages ----------
