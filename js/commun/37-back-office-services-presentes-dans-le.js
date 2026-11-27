@@ -2,9 +2,9 @@
 // ==================== BACK-OFFICE : services présentés dans le style delice.ca ====================
 const BO_SVC = {
     gallery:   { icon: "images",               tint: "#F4B9C2", title: "Galerie & mon site" },
-    catalog:   { icon: "book-open",            tint: "#F6D99A", title: "Catalogue" },
+    catalog:   { icon: "book-open",            tint: "#F6D99A", title: "Catalogue & produits" },
     company:   { icon: "building-2",           tint: "#A8D0E6", title: "Entreprise & réseaux" },
-    account:   { icon: "wallet",               tint: "#B9DCC3", title: "Achats & produits" },
+    account:   { icon: "wallet",               tint: "#B9DCC3", title: "Achats & profil" },
     stocks:    { icon: "package",              tint: "#F7C59F", title: "Stock" },
     invoices:  { icon: "receipt",              tint: "#C9B6E4", title: "Facturation" },
     costs:     { icon: "calculator",           tint: "#A8D0E6", title: "Coûts & marges" },
@@ -16,7 +16,7 @@ const BO_SVC = {
     tickets:   { icon: "calendar-check",       tint: "#C9B6E4", title: "Agenda & devis" }
 };
 const BO_GROUPS = [
-    { n: 1, over: "Étape 1", title: "Mon site", lead: "Ce que vos clients voient : le modèle de votre boutique et votre carte.", keys: ["gallery", "catalog"] },
+    { n: 1, over: "Étape 1", title: "Mon site", lead: "D'abord votre catalogue, puis le modèle de votre boutique.", keys: ["catalog", "gallery"] },
     { n: 2, over: "Étape 2", title: "Gestion du compte", lead: "Ce qui se passe en coulisses : achats, stock, factures et marges.", keys: ["company", "account", "stocks", "invoices", "costs"] },
     { n: 3, over: "Étape 3", title: "Publicité & services", lead: "Ce qui fait venir et revenir vos clients.", keys: ["orders", "campaigns", "payments", "notifs", "feedback", "tickets"] }
 ];

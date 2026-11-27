@@ -2,9 +2,9 @@
 // ==================== EN-TÊTE DU SERVICE OUVERT ====================
 const BO_META = {
     gallery: ["① Mon site", "Choisissez le modèle de votre boutique, vos photos, et partagez son lien."],
-    catalog: ["① Mon site", "Prix par format, délais de fabrication et produits visibles en boutique."],
+    catalog: ["① Mon site", "Ajoutez vos plats et produits, puis réglez prix, délais et disponibilité. À faire avant de choisir le modèle du site."],
     company: ["② Gestion du compte", "Vos numéros officiels (IFU, RCCM), vos coordonnées et les sites ou réseaux reliés à votre entreprise."],
-    account: ["② Gestion du compte", "Enregistrez vos achats (le stock se met à jour), vos produits et votre profil."],
+    account: ["② Gestion du compte", "Enregistrez vos achats (le stock se met à jour) et votre profil."],
     stocks: ["② Gestion du compte", "Niveaux de stock, seuils d'alerte et réapprovisionnement."],
     invoices: ["② Gestion du compte", "Factures normalisées e-MECeF et avoirs, émis à chaque vente."],
     costs: ["② Gestion du compte", "Coût de revient, marge par produit et effet d'une remise."],

@@ -25,6 +25,7 @@ function templatePreview(id) {
 }
 
 function renderGallery() {
+    document.getElementById("gal-catalog-gate")?.classList.toggle("hidden", PASTRIES.length > 0);
     const box = document.getElementById("bo-gallery-templates");
     if (!box) return;
     document.getElementById("gal-site-name").textContent = appState.tenant.name;
@@ -79,6 +80,12 @@ function renderGallery() {
 }
 
 function chooseTemplate(id) {
+    if (!PASTRIES.length) {
+        showToast("Ajoutez d'abord au moins un plat ou un produit à votre catalogue.", "info");
+        switchBoTab("catalog");
+        setTimeout(() => document.getElementById("np-name")?.focus(), 250);
+        return;
+    }
     applyFormat(id, false);
     const acc = currentAccount();
     if (acc?.business) acc.business.format = id;

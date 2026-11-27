@@ -166,6 +166,15 @@ if (document.readyState === "loading") document.addEventListener("DOMContentLoad
 // Les listes rendues plus tard (stock, coûts, panier…) sont étiquetées au fil de l'eau
 (() => { let pend = 0; new MutationObserver(() => { if (pend) return; pend = requestAnimationFrame(() => { pend = 0; labelOrphanFields(); }); }).observe(document.documentElement, { childList: true, subtree: true }); })();
 
+// Après le tout premier produit ajouté, on indique l'étape suivante : choisir le modèle du site
+const _addCustomProduct_first = addCustomProduct;
+addCustomProduct = function (e) {
+    const before = PASTRIES.length;
+    const r = _addCustomProduct_first.apply(this, arguments);
+    if (before === 0 && PASTRIES.length > 0) setTimeout(() => showToast("Étape suivante : choisissez le modèle de votre site dans « Galerie & mon site ».", "info"), 900);
+    return r;
+};
+
 // ---- Écran plein de connexion / inscription ----
 const AAS_HEADS = { signup: "Votre site et vos services, prêts en quelques minutes.", login: "Bon retour. Vos commandes vous attendent." };
 function openAuthScreen(mode = "login") {

@@ -2,8 +2,9 @@
 // ==================== Services générés : un service par écran, puis la grille complète ====================
 const SVC = { cards: [], gen: null, stage: null, panels: [], chips: [], bound: false, n: 0, state: [] };
 const SVC_DETAILS = {
-    gallery: ["4 modèles de site animés au choix", "Vos photos, vos couleurs, votre logo", "Un lien de boutique à partager"],
-    account: ["Achats et fournisseurs enregistrés", "Stock mis à jour à chaque vente", "Fiches produit avec prix et délai"],
+    gallery: ["5 modèles de site animés au choix", "Vos photos, vos couleurs, votre logo", "Un lien de boutique à partager"],
+    account: ["Achats et fournisseurs enregistrés", "Stock mis à jour à chaque vente", "Profil et sécurité du compte"],
+    catalog: ["Ajout d'un plat ou d'un produit avec photo", "Prix par format et délai de fabrication", "Produits visibles ou masqués en un clic"],
     orders: ["Chaque nouvelle commande signalée", "Statuts : reçue, en préparation, prête", "Facture normalisée en un clic"],
     payments: ["MTN MoMo, Moov Money, Celtiis Cash", "FedaPay, KKiaPay et carte bancaire", "Encaissements suivis jour par jour"],
     notifs: ["Confirmation de commande sur WhatsApp", "Rappel de retrait par SMS", "Reçu envoyé par e-mail"],
