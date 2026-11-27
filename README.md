@@ -37,6 +37,8 @@ Dans *Authentication* › *URL Configuration*, mettez l'adresse du site en ligne
 
 Le dossier se publie tel quel sur Vercel, Netlify ou tout hébergeur de fichiers statiques. `vercel.json` sert `boutique.html` à l'adresse `/boutique`.
 
+**Avec GitHub Pages (gratuit pour un dépôt public) :** *Settings* › *Pages* › *Build and deployment* : Source « Deploy from a branch », branche `main`, dossier `/ (root)`, puis *Save*. Le site est en ligne après une ou deux minutes à l'adresse `https://oswaldkora91-bot.github.io/AYO/`. Mettez cette adresse dans Supabase › *Authentication* › *URL Configuration* (« Site URL » et « Redirect URLs »).
+
 ## Les 5 formats de boutique
 
 | N° | Nom | Style |
