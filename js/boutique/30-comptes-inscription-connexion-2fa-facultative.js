@@ -323,7 +323,7 @@ function sendOtp(acc) {
     authGuard.otpExpires = Date.now() + OTP_VALIDITY_MS;
     authGuard.otpTriesLeft = OTP_MAX_TRIES;
     authGuard.resendAt = Date.now() + RESEND_COOLDOWN_MS;
-    document.getElementById("auth-masked-phone").textContent = maskPhone(acc.phone);
+    document.getElementById("auth-otp-dest").innerHTML = `Code à 6 chiffres envoyé par SMS au <span id="auth-masked-phone" class="font-mono">${escapeHTML(maskPhone(acc.phone))}</span> (démonstration).`;
     document.getElementById("sms-sim-code").textContent = current2faOtp;
     document.getElementById("sms-sim").classList.remove("hidden");
     document.querySelectorAll(".otp-box").forEach(b => { b.value = ""; });

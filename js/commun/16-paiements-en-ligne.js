@@ -15,13 +15,14 @@ function renderPayments() {
     if (!box) return;
     const paid = appState.orders.filter(o => o.payment !== "Devis Agenda");
     const isCash = o => /livraison|Retrait atelier/i.test(paymentMethodOf(o));
-    const collected = paid.filter(o => !isCash(o)).reduce((s, o) => s + o.amountFcfa, 0);
-    const toCollect = paid.filter(isCash).reduce((s, o) => s + o.amountFcfa, 0);
+    const isPaid = o => o.payStatus ? o.payStatus === "payé" : !isCash(o);
+    const collected = paid.filter(isPaid).reduce((s, o) => s + o.amountFcfa, 0);
+    const toCollect = paid.filter(o => !isPaid(o) && o.payStatus !== "refusé" && o.payStatus !== "annulé").reduce((s, o) => s + o.amountFcfa, 0);
     const intl = paid.filter(o => /\(Intl\)/.test(o.payment)).reduce((s, o) => s + o.amountFcfa, 0);
     const total = paid.reduce((s, o) => s + o.amountFcfa, 0) || 1;
     box.innerHTML =
-        kpiCard("Encaissé en ligne", convertFromFcfa(collected), "text-sage") +
-        kpiCard("À encaisser (livraison)", convertFromFcfa(toCollect), "text-caramel") +
+        kpiCard("Encaissé", convertFromFcfa(collected), "text-sage") +
+        kpiCard("À encaisser", convertFromFcfa(toCollect), "text-caramel") +
         kpiCard("Part diaspora", `${Math.round(intl / total * 100)}%`) +
         kpiCard("Transactions", String(paid.length));
 
@@ -57,7 +58,7 @@ function renderPayments() {
             </div>
             <div class="text-right">
                 <strong class="text-caramel">${convertFromFcfa(o.amountFcfa)}</strong>
-                <span class="block text-[10px] font-extrabold ${isCash(o) ? "text-caramel" : "text-sage"}">${isCash(o) ? "À encaisser" : "Payé"}</span>
+                <span class="block text-[10px] font-extrabold ${isPaid(o) ? "text-sage" : "text-caramel"}">${o.payStatus ? ({ "payé": "Payé en ligne", "en attente": "Paiement en attente", "refusé": "Paiement refusé", "annulé": "Paiement annulé" }[o.payStatus] || o.payStatus) : isCash(o) ? "À encaisser" : "Payé"}</span>
             </div>
         </div>`).join("");
 }

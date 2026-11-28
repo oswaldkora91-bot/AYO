@@ -82,6 +82,7 @@ function renderCampaigns() {
                 ${c.network === "Facebook" ? `<a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(campaignLink(c))}" target="_blank" rel="noopener" class="text-center bg-[#1877F2] text-white font-bold py-2 rounded-xl text-[10.5px]">Partager sur Facebook</a>`
                 : c.network === "WhatsApp" ? `<a href="https://wa.me/?text=${encodeURIComponent(campaignShareText(c))}" target="_blank" rel="noopener" class="text-center bg-[#25D366] text-white font-bold py-2 rounded-xl text-[10.5px]">Partager sur WhatsApp</a>`
                 : `<button type="button" onclick="copyCampaignText('${c.id}')" class="bg-darkChoc text-brass font-bold py-2 rounded-xl text-[10.5px]">Copier texte + lien</button>`}
+                <button type="button" onclick="shareCampaign('${c.id}')" class="col-span-2 bg-caramel text-white font-bold py-2.5 rounded-xl text-[11px]">Partager sur ${escapeHTML(c.network)} (image + texte)</button>
                 <button type="button" onclick="triggerSocialDeepLink('${c.id}')" class="bg-white border border-beech/35 text-darkChoc font-bold py-2 rounded-xl text-[10.5px]">Tester le lien</button>
                 <button type="button" onclick="copyCampaignLink('${c.id}')" class="bg-white border border-beech/35 text-darkChoc font-bold py-2 rounded-xl text-[10.5px]">Copier le lien</button>
                 <button type="button" onclick="toggleCampaign('${c.id}')" class="bg-white border border-beech/35 text-darkChoc font-bold py-2 rounded-xl text-[10.5px]">${c.active ? "Mettre en pause" : "Réactiver"}</button>
@@ -128,6 +129,57 @@ function createCampaign(e) {
     renderSocialBar();
     refreshIcons();
     showToast(`Publication ${network} prête${promo ? ` avec le code ${promo} (-${pct} %)` : ", sans promotion"}.`, "success");
+}
+
+// ---- Partage en un clic : image + texte + lien, vers l'appli du réseau ----
+// Sur téléphone, la fenêtre de partage ouvre Instagram, TikTok, Facebook ou WhatsApp avec le visuel prêt.
+// Sur ordinateur : le texte est copié, le visuel téléchargé et le réseau ouvert.
+async function campaignImageFile(c) {
+    const p = PASTRIES.find(x => x.id === c.pastryId);
+    const src = p && p.images && p.images[0];
+    if (!src) return null;
+    const img = await new Promise((ok, ko) => { const i = new Image(); i.crossOrigin = "anonymous"; i.onload = () => ok(i); i.onerror = ko; i.src = src; }).catch(() => null);
+    if (!img) return null;
+    const W = 1080, H = c.network === "TikTok" ? 1920 : 1350;
+    const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    const g = cv.getContext("2d");
+    g.fillStyle = "#231712"; g.fillRect(0, 0, W, H);
+    const r = Math.max(W / (img.naturalWidth || W), (H * 0.78) / (img.naturalHeight || H));
+    const iw = (img.naturalWidth || W) * r, ih = (img.naturalHeight || H) * r;
+    try { g.drawImage(img, (W - iw) / 2, 0, iw, ih); } catch (e) { return null; }
+    const grad = g.createLinearGradient(0, H * 0.55, 0, H); grad.addColorStop(0, "rgba(35,23,18,0)"); grad.addColorStop(0.45, "rgba(35,23,18,.92)"); grad.addColorStop(1, "#231712");
+    g.fillStyle = grad; g.fillRect(0, H * 0.55, W, H * 0.45);
+    g.fillStyle = "#FBF7F0"; g.font = "700 64px 'Playfair Display', Georgia, serif";
+    const title = (p.name || "").slice(0, 40); g.fillText(title, 64, H - 230, W - 128);
+    g.fillStyle = "#D4A373"; g.font = "600 40px Inter, sans-serif";
+    g.fillText(hasPromo(c) ? `-${c.pct} % avec le code ${c.promo}` : (appState.tenant.name || "").slice(0, 40), 64, H - 160, W - 128);
+    g.fillStyle = "rgba(251,247,240,.75)"; g.font = "500 32px Inter, sans-serif";
+    g.fillText("Commandez en ligne · lien dans la description", 64, H - 96, W - 128);
+    let blob = null;
+    try { blob = await new Promise(ok => cv.toBlob(ok, "image/png")); } catch (e) { blob = null; }
+    return blob ? new File([blob], `${(p.name || "publication").replace(/[^\w-]+/g, "-").slice(0, 40)}.png`, { type: "image/png" }) : null;
+}
+const NETWORK_WEB = { Instagram: "https://www.instagram.com/", TikTok: "https://www.tiktok.com/upload", Facebook: null, WhatsApp: null };
+async function shareCampaign(id) {
+    const c = appState.campaigns.find(x => x.id === id); if (!c) return;
+    const text = campaignShareText(c), link = campaignLink(c);
+    const file = await campaignImageFile(c);
+    if (navigator.share) {
+        const data = { title: c.title, text };
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
+        try { await navigator.share(data); c.shared = (c.shared || 0) + 1; saveAppState(); showToast(`Choisissez ${c.network} dans la liste, puis publiez.`, "success"); return; }
+        catch (err) { if (err && err.name === "AbortError") return; }
+    }
+    // Ordinateur : texte copié + visuel téléchargé + réseau ouvert
+    try { await navigator.clipboard.writeText(text); } catch (e) {}
+    if (file) { const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800); }
+    const url = c.network === "Facebook" ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`
+        : c.network === "WhatsApp" ? `https://wa.me/?text=${encodeURIComponent(text)}` : NETWORK_WEB[c.network];
+    if (url) window.open(url, "_blank", "noopener");
+    c.shared = (c.shared || 0) + 1; saveAppState();
+    showToast(c.network === "Instagram" || c.network === "TikTok"
+        ? `Visuel téléchargé et texte copié : sur ${c.network}, ajoutez l'image puis collez le texte.`
+        : `Texte copié${file ? " et visuel téléchargé" : ""} : publiez sur ${c.network}.`, "success");
 }
 
 async function copyCampaignText(id) {

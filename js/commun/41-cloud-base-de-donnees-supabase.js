@@ -23,7 +23,7 @@ function publicState() {
 }
 function accFromUser(user) {
     const m = user.user_metadata || {};
-    return { type: "business", name: m.name || user.email, email: user.email, phone: m.phone || "", twoFA: false, cloud: true, createdAt: user.created_at, business: m.business || {} };
+    return { type: "business", name: m.name || user.email, email: user.email, phone: m.phone || "", twoFA: !!m.twoFA, cloud: true, createdAt: user.created_at, business: m.business || {} };
 }
 function rememberCloudAccount(acc) {
     appState.accounts = (appState.accounts || []).filter(a => !(a.email === acc.email && a.type === "business"));
@@ -43,15 +43,90 @@ submitLogin = async function (e) {
     const { data, error } = await CLOUD.sb.auth.signInWithPassword({ email, password: pass });
     if (btn) btn.disabled = false;
     if (!error && data.user) {
-        CLOUD.user = data.user;
         const acc = accFromUser(data.user);
+        if (acc.twoFA) { await startEmailCode(acc, data.user); return; }
+        CLOUD.user = data.user;
         rememberCloudAccount(acc);
         completeLogin(acc);
         return;
     }
+    if (error && /fetch|network|load failed/i.test(error.message || "")) { setAuthError("login", "Connexion impossible au serveur AYO. Vérifiez internet ; si vous êtes dans l'aperçu Claude, ouvrez plutôt le site en ligne ou le fichier index.html."); return; }
     if (error && /confirm/i.test(error.message)) { setAuthError("login", "Confirmez d'abord votre adresse e-mail : ouvrez le lien reçu, puis reconnectez-vous."); return; }
     // Compte créé avant la mise en ligne de la base : on essaie sur l'appareil
     return _localSubmitLogin(e);
+};
+
+// ---- Code de connexion par e-mail (double authentification des comptes en ligne) ----
+// Le mot de passe est vérifié d'abord ; on ferme aussitôt cette session et on n'en ouvre une
+// qu'avec le code à 6 chiffres envoyé par Supabase à l'adresse du compte.
+let emailCodeFor = null;
+async function startEmailCode(acc, user) {
+    await CLOUD.sb.auth.signOut().catch(() => {});
+    emailCodeFor = { acc, email: user.email };
+    loginCandidate = acc;
+    document.getElementById("auth-login").classList.add("hidden");
+    document.getElementById("auth-mode-tabs").classList.add("hidden");
+    document.getElementById("auth-step2").classList.remove("hidden");
+    document.getElementById("auth-title").textContent = "Vérification";
+    await sendEmailCode();
+}
+async function sendEmailCode() {
+    if (!emailCodeFor) return;
+    document.getElementById("sms-sim").classList.add("hidden");
+    const [u, d] = emailCodeFor.email.split("@");
+    document.getElementById("auth-otp-dest").textContent = `Code à 6 chiffres envoyé par e-mail à ${u.slice(0, 2)}•••@${d}.`;
+    document.querySelectorAll(".otp-box").forEach(b => { b.value = ""; });
+    setAuthError(2, "");
+    const { error } = await CLOUD.sb.auth.signInWithOtp({ email: emailCodeFor.email, options: { shouldCreateUser: false } });
+    if (error) { setAuthError(2, /rate|seconds|security/i.test(error.message) ? "Patientez une minute avant de redemander un code." : "Envoi du code impossible pour le moment. Réessayez."); }
+    current2faOtp = "email";
+    authGuard.otpExpires = Date.now() + 10 * 60 * 1000;
+    authGuard.otpTriesLeft = OTP_MAX_TRIES;
+    authGuard.resendAt = Date.now() + 60 * 1000;
+    clearInterval(authGuard.timer);
+    authGuard.timer = setInterval(tickOtpTimer, 500);
+    tickOtpTimer();
+    setTimeout(() => document.querySelector(".otp-box")?.focus(), 50);
+}
+const _resendOtp_mail = resendOtp;
+resendOtp = function () {
+    if (!emailCodeFor) return _resendOtp_mail();
+    if (Date.now() < authGuard.resendAt) return;
+    sendEmailCode().then(() => showToast("Nouveau code envoyé par e-mail.", "success"));
+};
+const _submitAuthStep2_mail = submitAuthStep2;
+submitAuthStep2 = async function (e) {
+    if (!emailCodeFor) return _submitAuthStep2_mail(e);
+    e.preventDefault();
+    const code = Array.from(document.querySelectorAll(".otp-box")).map(b => b.value).join("");
+    if (code.length !== 6) return;
+    if (!current2faOtp) { setAuthError(2, "Code expiré : cliquez sur « Renvoyer le code »."); return; }
+    const { data, error } = await CLOUD.sb.auth.verifyOtp({ email: emailCodeFor.email, token: code, type: "email" });
+    if (error || !data || !data.user) {
+        authGuard.otpTriesLeft -= 1;
+        document.querySelectorAll(".otp-box").forEach(b => { b.value = ""; });
+        document.querySelector(".otp-box")?.focus();
+        if (authGuard.otpTriesLeft <= 0) { emailCodeFor = null; showAuthMode("login"); setAuthError("login", "Trop de codes erronés : reconnectez-vous."); return; }
+        setAuthError(2, `Code incorrect ou expiré. Essais restants : ${authGuard.otpTriesLeft}. Vous pouvez aussi demander un nouveau code.`);
+        tickOtpTimer();
+        return;
+    }
+    clearInterval(authGuard.timer);
+    const acc = accFromUser(data.user);
+    emailCodeFor = null;
+    CLOUD.user = data.user;
+    rememberCloudAccount(acc);
+    completeLogin(acc);
+};
+const _showAuthMode_mail = showAuthMode;
+showAuthMode = function (mode) { if (mode !== 2) emailCodeFor = null; return _showAuthMode_mail.apply(this, arguments); };
+// Activer / couper le code depuis « Mon compte »
+const _saveProfile_mail = saveProfile;
+saveProfile = function (e) {
+    const r = _saveProfile_mail.apply(this, arguments);
+    const acc = currentAccount && currentAccount();
+    if (cloudOn() && CLOUD.user && acc && acc.cloud) CLOUD.sb.auth.updateUser({ data: { twoFA: !!acc.twoFA } }).then(({ error }) => { if (error) showToast("Option du code de connexion non enregistrée en ligne. Réessayez.", "info"); });
+    return r;
 };
 
 // ---- Création de compte ----
@@ -68,7 +143,7 @@ submitSignupStep2 = async function (e) {
     if (btn) btn.disabled = true;
     const { data, error } = await CLOUD.sb.auth.signUp({
         email: p.email, password: p.pass,
-        options: { data: { app: "ayo", name: p.name, phone: p.phone, business }, emailRedirectTo: location.origin + location.pathname }
+        options: { data: { app: "ayo", name: p.name, phone: p.phone, business, twoFA: !!p.twoFA }, emailRedirectTo: location.origin + location.pathname }
     });
     if (btn) btn.disabled = false;
     if (error) {
@@ -153,13 +228,14 @@ async function cloudAdminCheck() {
 }
 async function cloudPush() {
     if (!CLOUD.user || !CLOUD.ready) return;
+    const user = CLOUD.user;
     await cloudAdminCheck();
-    const base = { owner: CLOUD.user.id, name: appState.tenant?.name || "", state: pickWorkspace(appState), public_state: publicState() };
+    const base = { owner: user.id, name: appState.tenant?.name || "", state: pickWorkspace(appState), public_state: publicState() };
     let slug = CLOUD.slug || siteSlug();
     for (let attempt = 0; attempt < 3; attempt++) {
         const { data, error } = await CLOUD.sb.from("workspaces").upsert({ ...base, slug }, { onConflict: "owner" }).select("id, slug").single();
-        if (!error) { CLOUD.wsId = data.id; CLOUD.slug = data.slug; return true; }
-        if (error.code === "23505" && /slug/.test(error.message + error.details)) { slug = `${siteSlug()}-${CLOUD.user.id.slice(0, 4 + attempt)}`; continue; }
+        if (!error && data) { CLOUD.wsId = data.id; CLOUD.slug = data.slug; return true; }
+        if (error.code === "23505" && /slug/.test(error.message + error.details)) { slug = `${siteSlug()}-${user.id.slice(0, 4 + attempt)}`; continue; }
         console.warn("Sauvegarde en ligne impossible", error);
         return false;
     }
@@ -169,17 +245,23 @@ async function cloudPush() {
 // ---- Commandes reçues en ligne ----
 async function cloudSyncOrders(silent) {
     if (!CLOUD.user || !CLOUD.wsId) return;
-    const { data, error } = await CLOUD.sb.from("orders").select("ref, payload, status, created_at").eq("workspace_id", CLOUD.wsId).order("created_at", { ascending: false }).limit(300);
+    const { data, error } = await CLOUD.sb.from("orders").select("ref, payload, status, created_at, pay_status, pay_amount").eq("workspace_id", CLOUD.wsId).order("created_at", { ascending: false }).limit(300);
     if (error || !data) return;
     const known = new Set(appState.orders.map(o => o.ref));
     let added = 0, changed = false;
     data.slice().reverse().forEach(r => {
         const local = appState.orders.find(o => o.ref === r.ref);
         if (!known.has(r.ref)) {
-            appState.orders.unshift({ ...r.payload, ref: r.ref, status: r.status, online: true });
+            appState.orders.unshift({ ...r.payload, ref: r.ref, status: r.status, online: true, payStatus: r.pay_status || null });
             added++;
-        } else if (local && local.online && local.status !== r.status) { local.status = r.status; changed = true; }
+        } else if (local && local.online) {
+            if (local.status !== r.status) { local.status = r.status; changed = true; }
+            if ((local.payStatus || null) !== (r.pay_status || null)) { local.payStatus = r.pay_status || null; changed = true; if (r.pay_status === "payé" && !silent) showToast(`Paiement reçu pour ${r.ref} (${formatFcfaOnly(Number(r.pay_amount) || local.amountFcfa)}).`, "success"); }
+        }
     });
+    // paiements en attente : on redemande l'état à FedaPay (3 au plus à chaque passage)
+    data.filter(r => r.pay_status === "en attente" && Date.now() - new Date(r.created_at).getTime() < 3 * 864e5).slice(0, 3)
+        .forEach(r => payCall({ action: "check", slug: CLOUD.slug, ref: r.ref }).then(x => { if (x.pay_status && x.pay_status !== "en attente") setTimeout(() => cloudSyncOrders(false), 500); }).catch(() => {}));
     if (added || changed) {
         saveAppState();
         renderBackOfficeAll();
@@ -229,8 +311,11 @@ submitCheckoutPayment = function (e) {
     const o = appState.orders[0];
     if (o && o.ref !== before && cloudOn() && CLOUD.shopSlug) {
         const payload = { ref: o.ref, client: o.client, details: o.details, payment: o.payment, amountFcfa: o.amountFcfa, items: o.items, discount: o.discount, shipping: o.shipping, source: o.source, lines, createdAt: new Date().toISOString() };
+        const online = String(o.payment || "").startsWith(PAY_ONLINE);
+        payReceipt(o, online ? "start" : "cash");
         CLOUD.sb.rpc("place_order", { p_slug: CLOUD.shopSlug, p_order: payload }).then(({ error }) => {
-            if (error) showToast("Commande enregistrée, mais l'envoi à la boutique a échoué. Réessayez ou contactez la boutique.", "info");
+            if (error) { showToast("Commande enregistrée, mais l'envoi à la boutique a échoué. Réessayez ou contactez la boutique.", "info"); if (online) payReceipt(o, "error", "La commande n'a pas pu être envoyée : le paiement n'a pas été lancé."); return; }
+            if (online) payStart(o);
         });
     }
     return r;

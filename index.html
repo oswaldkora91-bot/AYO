@@ -246,7 +246,7 @@
                 <div class="mt-5">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div class="p-3.5 rounded-2xl bg-white border border-beech/30"><strong class="block text-darkChoc">Mot de passe protégé</strong><span class="text-cocoaSoft">Jamais stocké en clair (empreinte SHA-256 salée).</span></div>
-                    <div class="p-3.5 rounded-2xl bg-white border border-beech/30"><strong class="block text-darkChoc">Code SMS en option</strong><span class="text-cocoaSoft">Double authentification à activer à l'inscription.</span></div>
+                    <div class="p-3.5 rounded-2xl bg-white border border-beech/30"><strong class="block text-darkChoc">Code de connexion en option</strong><span class="text-cocoaSoft">Double authentification à activer à l'inscription.</span></div>
                     <div class="p-3.5 rounded-2xl bg-white border border-beech/30"><strong class="block text-darkChoc">Paiements locaux & diaspora</strong><span class="text-cocoaSoft">FCFA, euro et dollar ; Mobile Money et cartes.</span></div>
                 </div>
             </div>
@@ -595,7 +595,7 @@
                                     <input type="tel" id="acc-phone" placeholder="Téléphone" class="px-3 py-2 rounded-xl bg-vanilla border border-beech/35 text-xs">
                                 </div>
                                 <input type="email" id="acc-email" aria-label="E-mail du compte" readonly class="w-full px-3 py-2 rounded-xl bg-vanillaDark/60 border border-beech/25 text-xs text-cocoaSoft">
-                                <label class="flex items-center gap-2 text-[11px] font-bold text-darkChoc cursor-pointer"><input type="checkbox" id="acc-2fa" class="w-4 h-4 accent-[#2E6F40]">Code SMS à chaque connexion (double authentification)</label>
+                                <label class="flex items-center gap-2 text-[11px] font-bold text-darkChoc cursor-pointer"><input type="checkbox" id="acc-2fa" class="w-4 h-4 accent-[#2E6F40]">Code de connexion par e-mail à chaque connexion (double authentification)</label>
                                 <button type="submit" class="w-full bg-darkChoc hover:bg-caramel text-white font-extrabold py-2.5 rounded-xl text-xs">Enregistrer le profil</button>
                             </form>
                         </div>
@@ -699,12 +699,13 @@
                         <h3 class="font-serif text-xl font-bold text-darkChoc">Paiements en Ligne</h3>
                         <p class="text-xs text-cocoaSoft">Mobile Money et agrégateurs pour le Bénin / UEMOA, carte et portefeuilles pour la diaspora.</p>
                     </div>
+                    <div id="bo-pay-online" class="p-4 rounded-2xl bg-vanilla border border-beech/30 text-xs text-darkChoc"></div>
                     <div id="bo-pay-kpis" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                         <div class="lg:col-span-5 space-y-3">
                             <h4 class="text-xs font-extrabold uppercase tracking-wider text-cocoaSoft">Moyens de paiement proposés au client</h4>
                             <div id="bo-pay-gateways" class="space-y-2"></div>
-                            <p class="text-[11px] text-cocoaSoft">Un moyen désactivé disparaît immédiatement du tunnel de paiement.</p>
+                            <p class="text-[11px] text-cocoaSoft">Ces choix servent à la démonstration. Dans votre vraie boutique en ligne, le client voit « Mobile Money ou carte (FedaPay) » si le paiement en ligne est activé ci-dessus, et « Paiement à la livraison / Retrait atelier ».</p>
                         </div>
                         <div class="lg:col-span-7 space-y-4">
                             <div>
@@ -948,7 +949,7 @@
                 </div>
                 <label class="flex items-start gap-2 p-2.5 rounded-xl bg-white border border-beech/30 text-[11px] text-darkChoc cursor-pointer">
                     <input type="checkbox" id="su-2fa" class="mt-0.5 w-4 h-4 accent-[#2E6F40]">
-                    <span><strong>Double authentification (facultatif)</strong><br><span class="text-cocoaSoft">Un code SMS vous sera demandé à chaque connexion.</span></span>
+                    <span><strong>Double authentification (facultatif)</strong><br><span class="text-cocoaSoft">Un code reçu par e-mail vous sera demandé à chaque connexion.</span></span>
                 </label>
                 <p id="auth-error-su1" class="hidden text-[11px] font-bold text-red-600"></p>
                 <button type="submit" class="w-full bg-darkChoc hover:bg-caramel text-white font-extrabold py-3 rounded-xl text-xs shadow">Continuer</button>
@@ -998,7 +999,7 @@
             <!-- CODE 2FA (seulement si activé sur le compte) -->
             <form id="auth-step2" onsubmit="submitAuthStep2(event)" class="hidden space-y-3.5">
                 <div class="p-3.5 rounded-2xl bg-sageLight border border-sage/30 text-xs space-y-1">
-                    <span class="font-extrabold text-sage block">Code à 6 chiffres envoyé par SMS au <span id="auth-masked-phone" class="font-mono">+229 •• •• •• 56</span>.</span>
+                    <span id="auth-otp-dest" class="font-extrabold text-sage block">Code à 6 chiffres envoyé par SMS au <span id="auth-masked-phone" class="font-mono">+229 •• •• •• 56</span>.</span>
                     <p class="text-[11px] text-cocoaSoft">Valable <strong id="auth-otp-timer" class="font-mono text-darkChoc">05:00</strong> • Essais restants : <strong id="auth-otp-left" class="text-darkChoc">5</strong></p>
                 </div>
                 <div id="auth-otp-boxes" class="grid grid-cols-6 gap-2">
@@ -1146,7 +1147,8 @@
     <script src="js/commun/39-entreprise-sites-connectes.js"></script>
     <script src="js/commun/40-modele-delice-remplissage-et-mouvements-de.js"></script>
     <script src="js/commun/41-cloud-base-de-donnees-supabase.js"></script>
-    <script src="js/espace-entreprise/42-boite-de-reception-en-ligne.js"></script>
-    <script src="js/commun/43-application-android-pwa.js"></script>
+    <script src="js/commun/42-boite-de-reception-en-ligne.js"></script>
+    <script src="js/espace-entreprise/43-paiement-en-ligne-reel-fedapay.js"></script>
+    <script src="js/commun/44-application-android-pwa.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 // AYO — mode hors connexion (service worker)
 // Garde une copie des fichiers du site sur le téléphone : l'application s'ouvre même sans réseau.
 // Les données (Supabase) ne sont jamais mises en cache : elles viennent toujours du réseau.
-const VERSION = "ayo-a032566bc0";
+const VERSION = "ayo-2ec5c53885";
 const CDN_CACHE = "ayo-cdn-v1";
 const CORE = [
   "./",
@@ -33,7 +33,7 @@ const CORE = [
   "js/boutique/19-retours-clients-reseaux-sociaux.js",
   "js/boutique/30-comptes-inscription-connexion-2fa-facultative.js",
   "js/boutique/32-agenda-reviews-contact-tickets.js",
-  "js/boutique/42-boite-de-reception-en-ligne.js",
+  "js/boutique/43-paiement-en-ligne-reel-fedapay.js",
   "js/commun/00-demarrage.js",
   "js/commun/02-security-html-escaping-anti-xss.js",
   "js/commun/03-constants-storage-key.js",
@@ -72,12 +72,13 @@ const CORE = [
   "js/commun/39-entreprise-sites-connectes.js",
   "js/commun/40-modele-delice-remplissage-et-mouvements-de.js",
   "js/commun/41-cloud-base-de-donnees-supabase.js",
-  "js/commun/43-application-android-pwa.js",
+  "js/commun/42-boite-de-reception-en-ligne.js",
+  "js/commun/44-application-android-pwa.js",
   "js/espace-entreprise/01-separation-boutique-espace-entreprise.js",
   "js/espace-entreprise/19-retours-clients-reseaux-sociaux.js",
   "js/espace-entreprise/30-comptes-inscription-connexion-2fa-facultative.js",
   "js/espace-entreprise/32-agenda-reviews-contact-tickets.js",
-  "js/espace-entreprise/42-boite-de-reception-en-ligne.js",
+  "js/espace-entreprise/43-paiement-en-ligne-reel-fedapay.js",
   "icons/ayo-192.png",
   "icons/ayo-512.png",
   "icons/ayo-apple-180.png",

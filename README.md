@@ -57,6 +57,27 @@ Ce que l'on y fait :
 Chaque action est écrite dans le **journal des actions** (date, administrateur, demande, valeurs avant/après).
 Les données d'administration ne sont accessibles que par des fonctions qui vérifient le rôle : la clé publique seule ne donne accès à rien.
 
+## Services branchés pour de vrai
+
+### Paiement Mobile Money et carte (FedaPay)
+
+L'argent va directement sur le compte FedaPay de chaque commerçant ; AYO ne le touche jamais.
+
+- Côté serveur : `supabase/paiements.sql` (table des clés, colonnes de paiement des commandes) et la fonction `supabase/functions/paiement` (déjà déployée sur le projet AYO).
+- Côté commerçant : *Back-office* › *Paiements en ligne* › coller sa clé secrète FedaPay (`sk_sandbox_…` pour les essais, `sk_live_…` pour encaisser), puis « Tester la clé ».
+- Côté client : la boutique propose « Mobile Money ou carte (FedaPay) » et « Paiement à la livraison / Retrait atelier ». Le client est envoyé sur la page de paiement FedaPay, puis revient sur la boutique, qui vérifie le paiement auprès de FedaPay. Le back-office affiche « Payé en ligne » dès que FedaPay confirme.
+- Le retour automatique sur la boutique demande que le site soit en ligne (adresse `https://`).
+
+### Partage sur Instagram, TikTok et Facebook
+
+*Publication réseaux* › « Partager sur … » : sur téléphone, la fenêtre de partage ouvre l'appli du réseau avec un visuel prêt (format portrait, et vertical pour TikTok) et le texte. Sur ordinateur, le visuel est téléchargé, le texte copié et le réseau ouvert. La publication automatique (Metricool) pourra venir ensuite.
+
+### Code de connexion par e-mail
+
+Un commerçant peut demander un code à chaque connexion (à l'inscription ou dans *Mon compte*). Le code à 6 chiffres est envoyé gratuitement par Supabase.
+**Réglage obligatoire une fois :** Supabase › *Authentication* › *Emails* › modèle **Magic Link** : remplacez le contenu par par exemple
+`<h2>Votre code AYO</h2><p>Code de connexion : <strong>{{ .Token }}</strong></p><p>Il expire dans quelques minutes.</p>`
+
 ## Mettre en ligne
 
 Le dossier se publie tel quel sur Vercel, Netlify ou tout hébergeur de fichiers statiques. `vercel.json` sert `boutique.html` à l'adresse `/boutique`.

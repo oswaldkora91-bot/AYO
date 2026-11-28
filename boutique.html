@@ -816,7 +816,7 @@
                 </div>
                 <label class="flex items-start gap-2 p-2.5 rounded-xl bg-white border border-beech/30 text-[11px] text-darkChoc cursor-pointer">
                     <input type="checkbox" id="su-2fa" class="mt-0.5 w-4 h-4 accent-[#2E6F40]">
-                    <span><strong>Double authentification (facultatif)</strong><br><span class="text-cocoaSoft">Un code SMS vous sera demandé à chaque connexion.</span></span>
+                    <span><strong>Double authentification (facultatif)</strong><br><span class="text-cocoaSoft">Un code reçu par e-mail vous sera demandé à chaque connexion.</span></span>
                 </label>
                 <p id="auth-error-su1" class="hidden text-[11px] font-bold text-red-600"></p>
                 <button type="submit" class="w-full bg-darkChoc hover:bg-caramel text-white font-extrabold py-3 rounded-xl text-xs shadow">Continuer</button>
@@ -866,7 +866,7 @@
             <!-- CODE 2FA (seulement si activé sur le compte) -->
             <form id="auth-step2" onsubmit="submitAuthStep2(event)" class="hidden space-y-3.5">
                 <div class="p-3.5 rounded-2xl bg-sageLight border border-sage/30 text-xs space-y-1">
-                    <span class="font-extrabold text-sage block">Code à 6 chiffres envoyé par SMS au <span id="auth-masked-phone" class="font-mono">+229 •• •• •• 56</span>.</span>
+                    <span id="auth-otp-dest" class="font-extrabold text-sage block">Code à 6 chiffres envoyé par SMS au <span id="auth-masked-phone" class="font-mono">+229 •• •• •• 56</span>.</span>
                     <p class="text-[11px] text-cocoaSoft">Valable <strong id="auth-otp-timer" class="font-mono text-darkChoc">05:00</strong> • Essais restants : <strong id="auth-otp-left" class="text-darkChoc">5</strong></p>
                 </div>
                 <div id="auth-otp-boxes" class="grid grid-cols-6 gap-2">
@@ -985,7 +985,8 @@
     <script src="js/commun/39-entreprise-sites-connectes.js"></script>
     <script src="js/commun/40-modele-delice-remplissage-et-mouvements-de.js"></script>
     <script src="js/commun/41-cloud-base-de-donnees-supabase.js"></script>
-    <script src="js/boutique/42-boite-de-reception-en-ligne.js"></script>
-    <script src="js/commun/43-application-android-pwa.js"></script>
+    <script src="js/commun/42-boite-de-reception-en-ligne.js"></script>
+    <script src="js/boutique/43-paiement-en-ligne-reel-fedapay.js"></script>
+    <script src="js/commun/44-application-android-pwa.js"></script>
 </body>
 </html>

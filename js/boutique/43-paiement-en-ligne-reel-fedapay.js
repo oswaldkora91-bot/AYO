@@ -1,75 +1,141 @@
-// AYO — BOÎTE DE RÉCEPTION EN LIGNE
+// AYO — PAIEMENT EN LIGNE RÉEL (FedaPay)
 // Version de la boutique client (boutique.html)
-// ==================== BOÎTE DE RÉCEPTION EN LIGNE ====================
-// Ce que les clients envoient depuis la boutique publique (réservations, avis, messages) part dans Supabase,
-// puis arrive dans le back-office de l'entreprise.
-const cloudPublic = () => cloudOn() && !!CLOUD.shopSlug && !appState.isAdminAuthenticated;
-function cloudFail(what, error) {
-    const msg = error && /trop de/.test(error.message || "") ? error.message : `${what} enregistré${/e$/.test(what) ? "e" : ""} ici, mais l'envoi à la boutique a échoué. Réessayez plus tard.`;
-    showToast(msg.charAt(0).toUpperCase() + msg.slice(1), "info");
+// ==================== PAIEMENT EN LIGNE RÉEL (FedaPay) ====================
+// L'argent va directement sur le compte FedaPay du commerçant. Sa clé secrète est gardée côté serveur
+// (fonction « paiement » de Supabase) : le navigateur ne la voit jamais.
+const PAY_ONLINE = "Mobile Money ou carte (FedaPay)";
+const PAY_CASH = "Paiement à la livraison / Retrait atelier";
+async function payCall(body, withUser) {
+    const headers = { "Content-Type": "application/json", apikey: SB_KEY };
+    if (withUser && CLOUD.sb) { const { data } = await CLOUD.sb.auth.getSession(); if (data && data.session) headers.Authorization = `Bearer ${data.session.access_token}`; }
+    let r;
+    try { r = await fetch(`${SB_URL}/functions/v1/paiement`, { method: "POST", headers, body: JSON.stringify(body) }); }
+    catch (e) { throw new Error("Connexion impossible au service de paiement. Vérifiez internet puis réessayez."); }
+    let j = {}; try { j = await r.json(); } catch (e) {}
+    if (!r.ok) { const m = j.error || "Le service de paiement ne répond pas."; throw new Error(m.charAt(0).toUpperCase() + m.slice(1)); }
+    return j;
+}
+// Dans la vraie boutique en ligne, on ne propose que ce qui marche vraiment
+const _enabledMethods_pay = enabledMethods;
+enabledMethods = function (region) {
+    if (!(cloudOn() && CLOUD.shopSlug && !appState.isAdminAuthenticated)) return _enabledMethods_pay(region);
+    return CLOUD.shopPay ? [PAY_ONLINE, PAY_CASH] : [PAY_CASH];
+};
+function payReceipt(o, mode, msg) {
+    const el = document.getElementById("tx-receipt-details"); if (!el || !o) return;
+    const amount = o.amountFcfa ? convertFromFcfa(o.amountFcfa) + " " : "";
+    el.textContent = {
+        start: `${amount}à payer par Mobile Money ou carte. La page de paiement sécurisée FedaPay s'ouvre…`,
+        cash: `${amount}à régler à la livraison ou au retrait.`,
+        error: `${msg || "Le paiement en ligne n'a pas pu démarrer."} Vous pouvez régler à la livraison ou contacter la boutique.`,
+        payé: `Commande ${amount}payée en ligne. Merci !`,
+        "en attente": "Paiement en cours de confirmation. La boutique est prévenue dès qu'il est validé.",
+        refusé: "Le paiement a été refusé. Vous pouvez repasser commande ou régler à la livraison.",
+        annulé: "Le paiement a été annulé. Vous pouvez repasser commande ou régler à la livraison."
+    }[mode] || el.textContent;
+}
+async function payStart(o) {
+    const slug = CLOUD.shopSlug;
+    const back = /^https?:$/.test(location.protocol) ? `${location.origin}${location.pathname}?shop=${encodeURIComponent(slug)}&ayo_pay=${encodeURIComponent(o.ref)}` : "";
+    try {
+        const r = await payCall({ action: "start", slug, ref: o.ref, return_url: back });
+        try { localStorage.setItem("ayo_pay_pending", JSON.stringify({ ref: o.ref, slug, amountFcfa: o.amountFcfa, at: Date.now() })); } catch (e) {}
+        if (r.env === "sandbox") showToast("Mode test FedaPay : aucun argent réel ne sera débité.", "info");
+        setTimeout(() => { location.href = r.url; }, r.env === "sandbox" ? 1200 : 300);
+    } catch (err) {
+        payReceipt(o, "error", err.message);
+        showToast(err.message, "info");
+    }
+}
+// Retour de la page FedaPay : on demande au serveur l'état réel du paiement
+async function payReturn() {
+    const q = new URLSearchParams(location.search), ref = q.get("ayo_pay");
+    if (!ref || !CLOUD.shopSlug) return;
+    let pending = null; try { pending = JSON.parse(localStorage.getItem("ayo_pay_pending") || "null"); } catch (e) {}
+    const o = { ref, amountFcfa: pending && pending.ref === ref ? pending.amountFcfa : 0 };
+    try { history.replaceState(null, "", `${location.pathname}#${CLOUD.shopSlug}`); } catch (e) {}
+    let st = "en attente";
+    try { st = (await payCall({ action: "check", slug: CLOUD.shopSlug, ref })).pay_status || "en attente"; } catch (e) {}
+    if (st === "payé") try { localStorage.removeItem("ayo_pay_pending"); } catch (e) {}
+    const box = document.getElementById("tx-receipt-box");
+    const refEl = document.getElementById("tx-receipt-ref");
+    if (box && refEl) {
+        try { toggleCartDrawer(true); setCartStep(2); } catch (e) {}
+        refEl.textContent = ref; payReceipt(o, st);
+        const inv = document.getElementById("tx-invoice-btn"); if (inv) inv.classList.add("hidden");
+        box.classList.remove("hidden");
+    }
+    showToast({ "payé": `Paiement reçu pour la commande ${ref}. Merci !`, "refusé": `Le paiement de ${ref} a été refusé.`, "annulé": `Le paiement de ${ref} a été annulé.` }[st] || `Paiement de ${ref} en cours de confirmation.`, st === "payé" ? "success" : "info");
 }
 
-// ---- Côté boutique ----
-const _submitAgendaBooking_c = submitAgendaBooking;
-submitAgendaBooking = function (e) {
-    const v = id => (document.getElementById(id)?.value || "").trim();
-    const snap = {
-        name: v("agenda-name"), phone: v("agenda-phone"), guests: parseInt(v("agenda-guests") || "1", 10), slot: v("agenda-slot"),
-        eventType: (document.getElementById("agenda-event-type")?.selectedOptions[0]?.text || "").split("(")[0].trim(),
-        day: `${appState.selectedAgendaDay} Nov 2026`
-    };
-    const before = appState.tickets[0]?.id;
-    const r = _submitAgendaBooking_c.apply(this, arguments);
-    const t = appState.tickets[0], o = appState.orders[0];
-    if (cloudPublic() && t && t.id !== before && t.type === "Agenda") {
-        CLOUD.sb.rpc("book_slot", { p_slug: CLOUD.shopSlug, p_booking: { ref: t.id, ...snap, estimateFcfa: o?.ref === t.id ? o.amountFcfa : 0 } })
-            .then(({ error }) => { if (error) cloudFail("réservation", error); });
+// ---- Côté entreprise : activer le paiement en ligne ----
+async function renderPayOnline() {
+    const box = document.getElementById("bo-pay-online"); if (!box) return;
+    if (!(cloudOn() && CLOUD.user && CLOUD.wsId)) {
+        box.innerHTML = `<strong class="block text-sm font-serif">Paiement en ligne réel (FedaPay)</strong><p class="mt-1 text-cocoaSoft">Connectez-vous avec votre compte AYO en ligne pour encaisser de vrais paiements Mobile Money et carte.</p>`;
+        return;
     }
-    return r;
-};
-const _addClientReview_c = addClientReview;
-addClientReview = function (e) {
-    const before = appState.reviews[0];
-    const r = _addClientReview_c.apply(this, arguments);
-    const rv = appState.reviews[0];
-    if (cloudPublic() && rv && rv !== before) {
-        CLOUD.sb.rpc("post_review", { p_slug: CLOUD.shopSlug, p_review: { author: rv.author, stars: rv.stars, item: rv.item, comment: rv.comment } })
-            .then(({ data, error }) => {
-                if (error) { cloudFail("avis", error); return; }
-                rv.cid = data; saveAppState();
-            });
+    let st = CLOUD.payStatus;
+    if (!st) {
+        box.innerHTML = `<p class="text-cocoaSoft">Chargement du paiement en ligne…</p>`;
+        const { data, error } = await CLOUD.sb.rpc("get_payment_status");
+        if (error) { box.innerHTML = `<p class="text-red-700">Impossible de lire l'état du paiement en ligne. Réessayez plus tard.</p>`; return; }
+        st = CLOUD.payStatus = data || { active: false };
     }
-    return r;
-};
-const _submitContactTicket_c = submitContactTicket;
-submitContactTicket = function (e) {
-    const v = id => (document.getElementById(id)?.value || "").trim();
-    const snap = { name: v("contact-name"), email: v("contact-email"), topic: v("contact-topic"), body: v("contact-msg") };
-    const before = appState.tickets[0]?.id;
-    const r = _submitContactTicket_c.apply(this, arguments);
-    const t = appState.tickets[0];
-    if (cloudPublic() && t && t.id !== before && t.type === "Contact") {
-        CLOUD.sb.rpc("send_message", { p_slug: CLOUD.shopSlug, p_message: { ref: t.id, ...snap } })
-            .then(({ error }) => { if (error) cloudFail("message", error); });
+    const form = `<form onsubmit="savePayKey(event)" class="mt-3 flex flex-col sm:flex-row gap-2">
+            <label class="sr-only" for="pay-key-input">Clé secrète FedaPay</label>
+            <input id="pay-key-input" type="password" autocomplete="off" spellcheck="false" placeholder="Clé secrète : sk_live_… ou sk_sandbox_…" class="flex-1 bg-white border border-beech/40 rounded-xl px-3 py-2 text-xs font-mono" required>
+            <button class="bg-darkChoc text-vanilla px-4 py-2 rounded-xl text-xs font-bold">Enregistrer la clé</button>
+        </form>`;
+    if (!st.active) {
+        box.innerHTML = `<strong class="block text-sm font-serif">Paiement en ligne réel : pas encore activé</strong>
+            <p class="mt-1 text-cocoaSoft">Vos clients paient par MTN MoMo, Moov Money ou carte, et l'argent arrive directement sur votre compte FedaPay. AYO ne touche jamais votre argent.</p>
+            <ol class="mt-2 list-decimal pl-5 space-y-0.5 text-cocoaSoft">
+                <li>Créez votre compte gratuit sur <a href="https://fedapay.com" target="_blank" rel="noopener" class="underline font-bold text-caramel">fedapay.com</a> et faites valider votre entreprise.</li>
+                <li>Dans FedaPay, ouvrez la page des clés API et copiez la <b>clé secrète</b>. Celle qui commence par <code>sk_sandbox_</code> sert aux essais ; celle qui commence par <code>sk_live_</code> encaisse pour de vrai.</li>
+                <li>Collez-la ci-dessous. Elle est gardée sur le serveur et ne s'affichera plus.</li>
+            </ol>${form}`;
+        return;
     }
-    return r;
-};
-// Les avis publiés en ligne s'affichent tout de suite dans la vitrine
-const _cloudLoadShop_c = cloudLoadShop;
-cloudLoadShop = async function (slug) {
-    const ok = await _cloudLoadShop_c(slug);
-    if (ok && cloudOn()) {
-        const { data } = await CLOUD.sb.rpc("get_shop", { p_slug: slug });
-        const online = (data && Array.isArray(data.reviews)) ? data.reviews : [];
-        const known = new Set(appState.reviews.map(r => r.cid).filter(Boolean));
-        const fresh = online.filter(r => !known.has(r.cid));
-        if (fresh.length) {
-            appState.reviews = [...fresh, ...appState.reviews];
-            try { renderReviewsSummary(); renderAll(); } catch (e) {}
-        }
-    }
-    return ok;
-};
+    const envTxt = st.env === "live" ? `<span class="px-2 py-0.5 rounded-full bg-sageLight text-sage font-extrabold">Encaissement réel</span>` : `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold">Mode test : aucun argent réel</span>`;
+    box.innerHTML = `<div class="flex flex-wrap items-center gap-2"><strong class="text-sm font-serif">Paiement en ligne FedaPay activé</strong>${envTxt}</div>
+        <p class="mt-1 text-cocoaSoft">Clé se terminant par ••••${escapeHTML(st.hint || "")}${st.verified_at ? ` · vérifiée le ${new Date(st.verified_at).toLocaleDateString("fr-FR")}` : " · pas encore vérifiée"}. Vos clients voient « ${PAY_ONLINE} » au moment de payer.</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+            <button type="button" onclick="testPayKey(this)" class="bg-darkChoc text-vanilla px-3.5 py-2 rounded-xl text-xs font-bold">Tester la clé</button>
+            <button type="button" onclick="document.getElementById('pay-key-change').classList.toggle('hidden')" class="bg-white border border-beech/40 px-3.5 py-2 rounded-xl text-xs font-bold">Changer la clé</button>
+            <button type="button" onclick="removePayKey()" class="bg-white border border-red-200 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold">Désactiver le paiement en ligne</button>
+        </div><div id="pay-key-change" class="hidden">${form}</div>`;
+}
+async function savePayKey(e) {
+    e.preventDefault();
+    const inp = document.getElementById("pay-key-input"), key = inp.value.trim();
+    const { data, error } = await CLOUD.sb.rpc("set_payment_key", { p_key: key });
+    inp.value = "";
+    if (error) { showToast(error.message.charAt(0).toUpperCase() + error.message.slice(1), "info"); return; }
+    CLOUD.payStatus = { ...data, verified_at: null };
+    await renderPayOnline();
+    showToast(data.env === "live" ? "Clé enregistrée : vos clients peuvent payer en ligne." : "Clé de test enregistrée : faites un essai sans argent réel.", "success");
+    testPayKey();
+}
+async function testPayKey(btn) {
+    if (btn) { btn.disabled = true; btn.textContent = "Test en cours…"; }
+    try {
+        const r = await payCall({ action: "test" }, true);
+        if (r.ok) { CLOUD.payStatus = { ...CLOUD.payStatus, verified_at: new Date().toISOString() }; showToast("FedaPay accepte votre clé.", "success"); }
+        else showToast(r.error || "FedaPay refuse cette clé.", "info");
+    } catch (err) { showToast(err.message, "info"); }
+    renderPayOnline();
+}
+async function removePayKey() {
+    if (!confirm("Désactiver le paiement en ligne ? Vos clients ne pourront plus payer par Mobile Money ou carte sur votre boutique.")) return;
+    const { error } = await CLOUD.sb.rpc("set_payment_key", { p_key: "" });
+    if (error) { showToast("Impossible de désactiver pour le moment.", "info"); return; }
+    CLOUD.payStatus = { active: false };
+    renderPayOnline();
+    showToast("Paiement en ligne désactivé.", "success");
+}
+const _renderPayments_pay = renderPayments;
+renderPayments = function () { _renderPayments_pay.apply(this, arguments); renderPayOnline(); };
 
 // ---- Côté entreprise : effets d'une commande en ligne (stock, facture, alerte) ----
 function applyOnlineOrderEffects(order) {
@@ -227,7 +293,7 @@ function accountForWorkspace(id) {
 
 // ---------- Démarrage de la boutique client ----------
 function bootShop() {
-    const slug = decodeURIComponent(location.hash.replace(/^#/, "").replace(/^boutique-/, ""));
+    const slug = decodeURIComponent(location.hash.replace(/^#/, "").replace(/^boutique-/, "")) || new URLSearchParams(location.search).get("shop") || "";
     let wsId = findWorkspaceIdBySlug(slug);
     const notFound = () => setTimeout(() => showToast("Boutique introuvable : voici la boutique de démonstration.", "info"), 400);
     if (slug && cloudOn()) {
